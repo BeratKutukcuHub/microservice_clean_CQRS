@@ -26,8 +26,12 @@ namespace IdentityService.Infrastructure.Concreate
             if (!IsAuthenticated)
                 return;
 
-            UserId = Guid.Parse(
-            user!.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userIdClaim = user!.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var guid))
+            {
+                UserId = guid;
+            }
+
             Email = user.FindFirst(ClaimTypes.Email)?.Value;
         }
 

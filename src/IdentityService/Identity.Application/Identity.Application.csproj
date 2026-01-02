@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Identity.Domain\Identity.Domain.csproj" />
     <ProjectReference Include="..\..\..\AbstactionBlocks\CommonExceptionBase\CommonExceptionBase.csproj" />
+    <ProjectReference Include="..\..\..\AbstactionBlocks\Common\Common.csproj" />
   </ItemGroup>
 
 </Project>

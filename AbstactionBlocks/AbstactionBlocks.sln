@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonApplication", "Common
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonExceptionBase", "CommonExceptionBase\CommonExceptionBase.csproj", "{AD6AD6C8-B1E8-47D1-93BA-2997902D6786}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{1A671C75-4849-450C-902A-A70054C56F2F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{AD6AD6C8-B1E8-47D1-93BA-2997902D6786}.Release|x64.Build.0 = Release|Any CPU
 		{AD6AD6C8-B1E8-47D1-93BA-2997902D6786}.Release|x86.ActiveCfg = Release|Any CPU
 		{AD6AD6C8-B1E8-47D1-93BA-2997902D6786}.Release|x86.Build.0 = Release|Any CPU
+		{1A671C75-4849-450C-902A-A70054C56F2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A671C75-4849-450C-902A-A70054C56F2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A671C75-4849-450C-902A-A70054C56F2F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1A671C75-4849-450C-902A-A70054C56F2F}.Debug|x64.Build.0 = Debug|Any CPU
+		{1A671C75-4849-450C-902A-A70054C56F2F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1A671C75-4849-450C-902A-A70054C56F2F}.Debug|x86.Build.0 = Debug|Any CPU
+		{1A671C75-4849-450C-902A-A70054C56F2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A671C75-4849-450C-902A-A70054C56F2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A671C75-4849-450C-902A-A70054C56F2F}.Release|x64.ActiveCfg = Release|Any CPU
+		{1A671C75-4849-450C-902A-A70054C56F2F}.Release|x64.Build.0 = Release|Any CPU
+		{1A671C75-4849-450C-902A-A70054C56F2F}.Release|x86.ActiveCfg = Release|Any CPU
+		{1A671C75-4849-450C-902A-A70054C56F2F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

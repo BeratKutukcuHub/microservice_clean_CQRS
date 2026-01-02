@@ -1,7 +1,7 @@
 using AbstractBlocks.CommonDomain.Logger;
 using IdentityService.Application.Exceptions;
 using IdentityService.Application.UOW;
-using IdentityService.Identity.Domain.Repository;
+using IdentityService.Identity.Application.Repository;
 using MediatR;
 
 namespace IdentityService.Application.Auth.Identity.Commands

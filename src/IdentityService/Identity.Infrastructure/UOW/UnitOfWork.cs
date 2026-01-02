@@ -1,7 +1,6 @@
 using IdentityService.Application.Interfaces;
 using IdentityService.Application.UOW;
-using IdentityService.Identity.Domain.Repository;
-using IdentityService.Identity.Infrastructure.Repositories;
+using IdentityService.Identity.Application.Repository;
 using MongoDB.Driver;
 
 namespace IdentityService.Identity.Infrastructure.UOW

@@ -1,5 +1,5 @@
 using IdentityService.Application.Interfaces;
-using IdentityService.Identity.Domain.Repository;
+using IdentityService.Identity.Application.Repository;
 
 namespace IdentityService.Application.UOW
 {

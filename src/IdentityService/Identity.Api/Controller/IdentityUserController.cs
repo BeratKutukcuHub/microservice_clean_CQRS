@@ -60,9 +60,15 @@ namespace IdentityService.Application.Api.Controller
 
         [HttpGet("GetAll")]
         [HasPermission("User.ViewAll")]
-        public async Task<ActionResult<IEnumerable<IdentityUserDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<IdentityUserDto>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 50)
         {
-            var result = await _sender.Send(new GetAllIdentityUsersCommand());
+            var pagination = new AbstractionBlocks.CommonApplication.Pagination.PaginationValue
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+            var command = new GetAllIdentityUsersCommand(pagination);
+            var result = await _sender.Send(command);
             return Ok(result);
         }
         [HttpPost("AssignRole")]

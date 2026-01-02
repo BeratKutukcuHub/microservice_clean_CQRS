@@ -1,5 +1,3 @@
-using System.Security.Claims;
-using IdentityService.Application.UOW;
 using Microsoft.AspNetCore.Authorization;
 
 namespace IdentityService.Api.Security

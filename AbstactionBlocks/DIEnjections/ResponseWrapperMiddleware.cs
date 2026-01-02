@@ -21,6 +21,7 @@ public class ResponseWrapperMiddleware : IMiddleware
         {
             await next(context);
 
+            // If it's a 404 and empty body, wrap it
             if (context.Response.StatusCode == 404 && memoryStream.Length == 0)
             {
                 var wrapped404 = ApiResponse<object>.Error(new List<string> { "Matching endpoint not found." }, 404, context.TraceIdentifier);
@@ -31,17 +32,31 @@ public class ResponseWrapperMiddleware : IMiddleware
                 return;
             }
 
-            if (context.Response.StatusCode >= 400)
-                return;
-
-            if (!context.Response.ContentType?.Contains("application/json") == true)
-                return;
-
+            // Read the body
             memoryStream.Position = 0;
             var bodyText = await new StreamReader(memoryStream).ReadToEndAsync();
 
             if (string.IsNullOrWhiteSpace(bodyText))
+            {
+                // For empty bodies with error status codes, return a standard error
+                if (context.Response.StatusCode >= 400)
+                {
+                    var errorWrapped = ApiResponse<object>.Error(new List<string> { $"Request failed with status {context.Response.StatusCode}" }, context.Response.StatusCode, context.TraceIdentifier);
+                    var errorJson = JsonSerializer.Serialize(errorWrapped, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                    context.Response.Body = originalBody;
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync(errorJson);
+                }
                 return;
+            }
+
+            // If already wrapped or not JSON, just return
+            if (bodyText.Contains("\"isSuccess\":") || bodyText.Contains("\"IsSuccess\":"))
+            {
+                context.Response.Body = originalBody;
+                await context.Response.WriteAsync(bodyText);
+                return;
+            }
 
             object? data;
             try
@@ -50,25 +65,36 @@ public class ResponseWrapperMiddleware : IMiddleware
             }
             catch
             {
-                return;
+                // If not JSON, but we have a body and it's an error, wrap it as a string
+                if (context.Response.StatusCode >= 400)
+                {
+                    data = bodyText;
+                }
+                else
+                {
+                    context.Response.Body = originalBody;
+                    await context.Response.WriteAsync(bodyText);
+                    return;
+                }
             }
 
-            var wrapped = ApiResponse<object>.Success(
-                data,
-                context.TraceIdentifier,
-                200
-            );
+            ApiResponse<object> wrapped;
+            if (context.Response.StatusCode >= 400)
+            {
+                var errors = data is JsonElement je && je.ValueKind == JsonValueKind.Object
+                    ? new List<string> { data.ToString()! }
+                    : new List<string> { bodyText };
+                wrapped = ApiResponse<object>.Error(errors, context.Response.StatusCode, context.TraceIdentifier);
+            }
+            else
+            {
+                wrapped = ApiResponse<object>.Success(data, context.TraceIdentifier, context.Response.StatusCode);
+            }
 
-            var json = JsonSerializer.Serialize(
-                wrapped,
-                new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+            var json = JsonSerializer.Serialize(wrapped, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
             context.Response.Body = originalBody;
             context.Response.ContentType = "application/json";
-
             await context.Response.WriteAsync(json);
         }
         finally

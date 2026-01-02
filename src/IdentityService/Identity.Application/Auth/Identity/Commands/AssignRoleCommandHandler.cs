@@ -1,6 +1,6 @@
 using AbstractBlocks.CommonDomain.Logger;
 using AbstractionBlocks.CommonExceptionBase;
-using IdentityService.Identity.Domain.Repository;
+using IdentityService.Identity.Application.Repository;
 using MediatR;
 
 namespace IdentityService.Application.Auth.Identity.Commands

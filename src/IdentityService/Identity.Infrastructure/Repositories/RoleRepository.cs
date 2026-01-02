@@ -1,7 +1,7 @@
 using AbstractionBlocks.CommonInfrastructure;
 using AbstractionBlocks.CommonInfrastructure.Persistance;
+using IdentityService.Identity.Application.Repository;
 using IdentityService.Identity.Domain;
-using IdentityService.Identity.Domain.Repository;
 using MongoDB.Driver;
 
 namespace IdentityService.Identity.Infrastructure.Repositories

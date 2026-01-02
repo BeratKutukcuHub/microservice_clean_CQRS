@@ -15,7 +15,6 @@ namespace AbstractionBlocks.DIEnjections
         public static IServiceCollection AddDIEnjectionsServices(this IServiceCollection services, string dbName, params Type[] repoTypes)
         {
             BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
-
             services.AddSingleton<IMongoClient>(x => new MongoClient("mongodb://localhost:27017"));
             services.AddScoped(x => x.GetRequiredService<IMongoClient>().GetDatabase(dbName));
 

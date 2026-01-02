@@ -1,12 +1,10 @@
 using System.Text;
 using AbstractBlocks.CommonDomain.Logger;
 using AbstractionBlocks.CommonExceptionBase;
-using IdentityService.Application.Exceptions;
 using IdentityService.Application.Helper;
 using IdentityService.Application.Provider;
-using IdentityService.Identity.Domain.Exceptions;
+using IdentityService.Identity.Application.Repository;
 using IdentityService.Identity.Domain.Helper;
-using IdentityService.Identity.Domain.Repository;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 

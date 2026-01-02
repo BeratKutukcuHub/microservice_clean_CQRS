@@ -2,8 +2,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Identity.Domain\Identity.Domain.csproj" />
-    <ProjectReference Include="..\..\..\AbstactionBlocks\CommonInfrastructure\CommonInfrastructure.csproj" />
     <ProjectReference Include="..\Identity.Application\Identity.Application.csproj" />
+    <ProjectReference Include="..\..\..\AbstactionBlocks\CommonInfrastructure\CommonInfrastructure.csproj" />
+    <ProjectReference Include="..\..\..\AbstactionBlocks\Common\Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

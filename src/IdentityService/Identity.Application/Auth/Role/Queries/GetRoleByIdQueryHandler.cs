@@ -1,7 +1,7 @@
 using IdentityService.Application.Auth.Identity.Profile;
-using IdentityService.Identity.Domain.Repository;
 using MediatR;
 using AbstractionBlocks.CommonExceptionBase;
+using IdentityService.Identity.Application.Repository;
 
 namespace IdentityService.Application.Auth.Role.Queries
 {
