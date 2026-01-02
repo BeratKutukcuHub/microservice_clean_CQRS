@@ -55,7 +55,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var uow = scope.ServiceProvider.GetRequiredService<IdentityService.Application.UOW.IUnitOfWork>();
-    var adminEmail = "admin@antigravity.com";
+    var adminEmail = "admin@example.com";
     var adminUser = (await uow.IdentityRepository.FindAsync(x => x.Email == adminEmail)).FirstOrDefault();
     if (adminUser == null)
     {
