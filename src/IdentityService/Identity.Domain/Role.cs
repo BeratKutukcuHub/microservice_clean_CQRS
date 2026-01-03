@@ -1,4 +1,4 @@
-using AbstractionBlocks.CommonDomain;
+using AbstractionBlocks.Common.Domain;
 
 namespace IdentityService.Identity.Domain
 {

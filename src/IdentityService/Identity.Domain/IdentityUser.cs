@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using System.Text;
-using AbstractionBlocks.CommonDomain;
 using IdentityService.Identity.Domain.Exceptions;
 using IdentityService.Identity.Domain.Helper;
+using AbstractionBlocks.Common.Domain;
 namespace IdentityService.Identity.Domain
 {
 

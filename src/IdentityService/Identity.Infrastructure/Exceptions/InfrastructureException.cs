@@ -1,6 +1,6 @@
-using AbstractionBlocks.CommonExceptionBase;
+using AbstractionBlocks.Common.Exception;
 
-namespace IdentityService.Infrastructure.Exceptions
+namespace IdentityService.Identity.Infrastructure.Exceptions
 {
     public abstract class InfrastructureException : BaseDomainException
     {

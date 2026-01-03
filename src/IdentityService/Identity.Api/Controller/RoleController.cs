@@ -1,10 +1,9 @@
-using IdentityService.Api.Security;
 using IdentityService.Application.Auth.Identity.Profile;
 using IdentityService.Application.Auth.Role.Commands;
 using IdentityService.Application.Auth.Role.Queries;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Authentication.Security;
 
 namespace IdentityService.Application.Api.Controller
 {

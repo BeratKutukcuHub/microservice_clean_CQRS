@@ -1,6 +1,6 @@
 using IdentityService.Application.Auth.Identity.Profile;
 using MediatR;
-using AbstractionBlocks.CommonExceptionBase;
+using AbstractionBlocks.Common.Exception;
 using IdentityService.Identity.Application.Repository;
 
 namespace IdentityService.Application.Auth.Role.Queries

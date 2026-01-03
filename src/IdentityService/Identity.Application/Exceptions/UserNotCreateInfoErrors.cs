@@ -1,4 +1,4 @@
-using AbstractionBlocks.CommonExceptionBase;
+using AbstractionBlocks.Common.Exception;
 
 namespace IdentityService.Application.Exceptions
 {

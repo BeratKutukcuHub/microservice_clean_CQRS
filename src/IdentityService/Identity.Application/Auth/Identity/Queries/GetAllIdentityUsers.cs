@@ -1,5 +1,5 @@
-using AbstractBlocks.CommonDomain.Logger;
-using AbstractionBlocks.CommonApplication.Pagination;
+using AbstractionBlocks.Common.Exception.Logger;
+using AbstractionBlocks.Common.Pagination;
 using IdentityService.Application.Auth.Identity.Profile;
 using IdentityService.Application.UOW;
 using IdentityService.Identity.Application.Repository;

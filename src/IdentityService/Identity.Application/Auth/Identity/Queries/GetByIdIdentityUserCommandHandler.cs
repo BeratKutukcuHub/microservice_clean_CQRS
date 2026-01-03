@@ -1,4 +1,4 @@
-using AbstractBlocks.CommonDomain.Logger;
+using AbstractionBlocks.Common.Exception.Logger;
 using AutoMapper;
 using IdentityService.Application.Auth.Identity.Profile;
 using IdentityService.Application.Exceptions;

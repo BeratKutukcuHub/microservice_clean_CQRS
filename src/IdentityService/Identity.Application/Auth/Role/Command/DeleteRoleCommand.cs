@@ -1,4 +1,4 @@
-using AbstractBlocks.CommonDomain.Logger;
+using AbstractionBlocks.Common.Exception.Logger;
 using IdentityService.Application.UOW;
 using MediatR;
 

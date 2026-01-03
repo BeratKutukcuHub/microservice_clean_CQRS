@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\AbstactionBlocks\CommonDomain\CommonDomain.csproj" />
-    <ProjectReference Include="..\..\..\AbstactionBlocks\CommonExceptionBase\CommonExceptionBase.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Domain\Common.Domain.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Exception\Common.Exception.csproj" />
   </ItemGroup>
 
   <ItemGroup>

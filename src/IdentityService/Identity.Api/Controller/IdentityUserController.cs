@@ -1,4 +1,3 @@
-using IdentityService.Api.Security;
 using IdentityService.Application.Auth.Identity.Commands;
 using IdentityService.Application.Auth.Identity.Queries;
 using IdentityService.Application.Auth.Identity.Profile;
@@ -6,6 +5,7 @@ using IdentityService.Application.Provider;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Authentication.Security;
 
 namespace IdentityService.Application.Api.Controller
 {
@@ -62,7 +62,7 @@ namespace IdentityService.Application.Api.Controller
         [HasPermission("User.ViewAll")]
         public async Task<ActionResult<IEnumerable<IdentityUserDto>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 50)
         {
-            var pagination = new AbstractionBlocks.CommonApplication.Pagination.PaginationValue
+            var pagination = new AbstractionBlocks.Common.Pagination.PaginationValue
             {
                 PageNumber = pageNumber,
                 PageSize = pageSize

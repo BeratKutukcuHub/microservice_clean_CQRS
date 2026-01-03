@@ -1,4 +1,5 @@
-using AbstractionBlocks.CommonApplication.Pagination;
+using AbstractionBlocks.Common;
+using AbstractionBlocks.Common.Pagination;
 using MongoDB.Driver;
 
 namespace IdentityService.Identity.Infrastructure.Extensions

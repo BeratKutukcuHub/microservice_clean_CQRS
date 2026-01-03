@@ -1,4 +1,4 @@
-using AbstractionBlocks.DIEnjections;
+using AbstractionBlocks.Common.Infrastructure.Extensions;
 using IdentityService.Application.Interfaces;
 using IdentityService.Application.UOW;
 using IdentityService.Identity.Infrastructure.Repositories;
@@ -14,8 +14,8 @@ namespace IdentityService.Identity.Infrastructure.DI
     {
         public static IServiceCollection AddIdentityInfrastructureDIServices(this IServiceCollection services)
         {
-            services.AddDIEnjectionsServices
-            ("IdentityDatabase", typeof(IdentityUser), typeof(Role));
+            services.AddDIEnjectionServices
+            ("IdentityDatabase", new Type[] { typeof(IdentityUser), typeof(Role) });
             services.AddScoped<IIdentityRepository, IdentityUserRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<ICurrentUser, CurrentUser>();

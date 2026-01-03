@@ -1,26 +1,38 @@
 
 
-using AbstactionBlocks.DIEnjections;
-using DIEnjections;
 using IdentityService.Application.DI;
 using IdentityService.Identity.Infrastructure.DI;
-using IdentityService.Api.Security;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
+using AbstractionBlocks.DIEnjections;
+using AbstractionBlocks.Common.Exception.Logger;
+using AbstractionBlocks.Common.SecretBase.DI;
+using Shared.Authentication;
+using IdentityService.Identity.Infrastructure.Seed;
+using NLog.Web;
+using AbstractionBlocks.Common.Authentication.Security;
+using Microsoft.AspNetCore.Authorization;
 
+NLog.LogManager.Setup().LoadConfigurationFromAppSettings();
+var logger = NLog.LogManager.GetCurrentClassLogger();
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
+builder.Host.UseNLog();
+
+try
+{
 builder.Services.AddControllers();
 builder.Services.AddRouting();
-builder.AddNLogLoggerService();
-builder.Services.AddGlobalExceptionHandler();
-builder.Services.AddJwtBearerTokenSolverAuthenticationService
-(builder.Configuration.GetSection("Jwt:SecretKey").Value ?? string.Empty);
+builder.Services.AddDIEnjectionsSecretBase();
+builder.Services.AddDICommonAuthentication();
 builder.Services.AddIdentityApplicationDIServices();
 builder.Services.AddIdentityInfrastructureDIServices();
 builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationPolicyProvider, IdentityService.Api.Security.PermissionPolicyProvider>();
-builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, IdentityService.Api.Security.PermissionHandler>();
+builder.Services.AddGlobalExceptionHandler();
+builder.Services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+builder.Services.AddAuthorization();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -50,35 +62,13 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-var app = builder.Build();
+    var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var uow = scope.ServiceProvider.GetRequiredService<IdentityService.Application.UOW.IUnitOfWork>();
-    var adminEmail = "admin@example.com";
-    var adminUser = (await uow.IdentityRepository.FindAsync(x => x.Email == adminEmail)).FirstOrDefault();
-    if (adminUser == null)
-    {
-        var adminRole = (await uow.RoleRepository.FindAsync(x => x.Name == "Admin")).FirstOrDefault();
-        if (adminRole == null)
-        {
-            adminRole = IdentityService.Identity.Domain.Role.Create("Admin");
-            adminRole.AddPermission("User.Create");
-            adminRole.AddPermission("User.Delete");
-            adminRole.AddPermission("User.ViewAll");
-            adminRole.AddPermission("Role.Create");
-            adminRole.AddPermission("Role.Delete");
-            adminRole.AddPermission("Role.ViewAll");
-            await uow.RoleRepository.AddAsync(adminRole);
-        }
+    await app.Services.EnsureSeedDataAsync();
 
-        var newAdmin = IdentityService.Identity.Domain.IdentityUser.Create("Admin", adminEmail, "Admin123!");
-        newAdmin.AddRole(adminRole.Id);
-        await uow.IdentityRepository.AddAsync(newAdmin);
-    }
-}
-
-app.UseGlobalExceptionHandler();
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<GlobalExceptionHandler>();
+app.UseMiddleware<ResponseWrapperMiddleware>();
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
@@ -87,5 +77,14 @@ app.MapControllers();
 app.MapSwagger();
 app.UseSwaggerUI();
 app.Run();
-
+}
+catch (Exception ex)
+{
+    logger.Error(ex, "Stopped program because of exception");
+    throw;
+}
+finally
+{
+    NLog.LogManager.Shutdown();
+}
 

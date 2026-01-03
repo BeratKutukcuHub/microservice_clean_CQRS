@@ -1,6 +1,6 @@
-using AbstractionBlocks.CommonApplication.Pagination;
-using AbstractionBlocks.CommonInfrastructure;
-using AbstractionBlocks.CommonInfrastructure.Persistance;
+using AbstractionBlocks.Common.Pagination;
+using AbstractionBlocks.Common.Infrastructure;
+using AbstractionBlocks.Common.Infrastructure.Persistance;
 using IdentityService.Identity.Application.Repository;
 using IdentityService.Identity.Domain;
 using IdentityService.Identity.Infrastructure.Extensions;

@@ -9,14 +9,18 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.0.0" />
     <PackageReference Include="MediatR" Version="14.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Application\Common.Application.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.SecretBase\Common.SecretBase.csproj" />
     <ProjectReference Include="..\Identity.Domain\Identity.Domain.csproj" />
-    <ProjectReference Include="..\..\..\AbstactionBlocks\CommonExceptionBase\CommonExceptionBase.csproj" />
-    <ProjectReference Include="..\..\..\AbstactionBlocks\Common\Common.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Domain\Common.Domain.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Exception\Common.Exception.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common\Common.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Authentication\Common.Authentication.csproj" />
   </ItemGroup>
 
 </Project>

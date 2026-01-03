@@ -1,5 +1,5 @@
-using AbstractBlocks.CommonDomain.Logger;
-using AbstractionBlocks.CommonExceptionBase;
+using AbstractionBlocks.Common.Exception.Logger;
+using AbstractionBlocks.Common.Exception;
 using IdentityService.Identity.Application.Repository;
 using MediatR;
 

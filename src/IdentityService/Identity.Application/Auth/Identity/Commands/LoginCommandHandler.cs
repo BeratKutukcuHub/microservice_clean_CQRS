@@ -1,12 +1,9 @@
-using System.Text;
-using AbstractBlocks.CommonDomain.Logger;
-using AbstractionBlocks.CommonExceptionBase;
-using IdentityService.Application.Helper;
+using AbstractionBlocks.Common.Exception.Logger;
+using AbstractionBlocks.Common.Exception;
 using IdentityService.Application.Provider;
 using IdentityService.Identity.Application.Repository;
 using IdentityService.Identity.Domain.Helper;
 using MediatR;
-using Microsoft.Extensions.Configuration;
 
 namespace IdentityService.Application.Auth.Identity.Commands
 {
@@ -16,13 +13,13 @@ namespace IdentityService.Application.Auth.Identity.Commands
         private readonly IIdentityRepository _identityRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly ILoggerService<LoginCommandHandler> _logger;
-        private readonly IConfiguration _config;
-        public LoginCommandHandler(IIdentityRepository identityRepository, IRoleRepository roleRepository, IConfiguration config,
+        private readonly ITokenService _tokenService;
+        public LoginCommandHandler(IIdentityRepository identityRepository, IRoleRepository roleRepository, ITokenService tokenService,
         ILoggerService<LoginCommandHandler> logger)
         {
             _identityRepository = identityRepository;
             _roleRepository = roleRepository;
-            _config = config;
+            _tokenService = tokenService;
             _logger = logger;
         }
         public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -61,8 +58,24 @@ namespace IdentityService.Application.Auth.Identity.Commands
             var refreshToken = user.AddRefreshToken();
             await _identityRepository.UpdateAsync(user);
 
-            var tokenGenerator = new JwtTokenGenerator(_config);
-            return new LoginResponse(tokenGenerator.GenerateToken(user, permissions.Distinct()), refreshToken);
+            var claims = new List<KeyValuePair<string,string>>
+            {
+                new KeyValuePair<string,string>(System.Security.Claims.ClaimTypes.Name, user.Name),
+                new KeyValuePair<string,string>(System.Security.Claims.ClaimTypes.Email, user.Email),
+                new KeyValuePair<string,string>(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id.ToString())
+            };
+
+            foreach(var roleId in user.RoleIds)
+            {
+                claims.Add(new KeyValuePair<string,string>(System.Security.Claims.ClaimTypes.Role, roleId.ToString()));
+            }
+            foreach(var p in permissions.Distinct())
+            {
+                claims.Add(new KeyValuePair<string,string>("permission", p));
+            }
+
+            var token = await _tokenService.CreateTokenAsync(user.Id.ToString(), claims);
+            return new LoginResponse(token, refreshToken);
         }
     }
 }

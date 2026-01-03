@@ -1,6 +1,8 @@
 using IdentityService.Application.Auth.Identity.Commands;
 using IdentityService.Application.Mappings;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Authentication;
+using IdentityService.Application.Auth;
 
 namespace IdentityService.Application.DI
 {
@@ -10,6 +12,7 @@ namespace IdentityService.Application.DI
         {
             services.AddAutoMapper(x => x.AddProfile(typeof(Profiles)));
             services.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<CreateIdentityCommand>());
+            services.AddSingleton<ITokenService, TokenService>();
             return services;
         } 
     }

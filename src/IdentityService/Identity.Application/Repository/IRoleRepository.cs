@@ -1,4 +1,4 @@
-using AbstractionBlocks.CommonDomain.Repository;
+using AbstractionBlocks.Common.Application.Repository;
 using IdentityService.Identity.Domain;
 
 namespace IdentityService.Identity.Application.Repository
