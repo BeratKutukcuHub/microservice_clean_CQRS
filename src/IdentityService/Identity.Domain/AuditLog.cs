@@ -37,6 +37,6 @@ namespace IdentityService.Identity.Domain
             string entityName, Guid entityId, string action, Guid userId, Guid correlationId, string source, List<ChangeDetail> changes
         ) => new(entityName, entityId, action, userId, DateTime.UtcNow, correlationId, source, changes);
         public void AddChange(ChangeDetail changeDetail) => Changes.Add(changeDetail);
-        public void AddAuditEvent(AuditLog auditLog) => _events.Add(new AuditLogEventDomain(auditLog));
+        public void AddAuditEvent() => _events.Add(new AuditLogEventDomain(this));
     }
 }

@@ -1,6 +1,6 @@
 namespace AbstractionBlocks.Common.Domain
 {
-    public interface IAggregateRoot
+    public interface IAggregateRoot : IEventDomain
     {
         IReadOnlyList<IEventDomain> Events { get; }
     }

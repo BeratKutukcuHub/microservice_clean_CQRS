@@ -1,3 +1,4 @@
+using AbstractionBlocks.Common.Infrastructure;
 using AbstractionBlocks.Common.Infrastructure.Persistance;
 using AbstractionBlocks.Common.Pagination;
 using IdentityService.Application.Interfaces;
@@ -8,13 +9,10 @@ using MongoDB.Driver;
 
 namespace IdentityService.Identity.Infrastructure.Repositories
 {
-    public class AuditRepository : IAuditRepository
+    public class AuditRepository : Repository<AuditLog>,IAuditRepository
     {
-        private readonly MongoDatabase<AuditLog> _collection;
-
-        public AuditRepository(MongoDatabase<AuditLog> collection)
+        public AuditRepository(MongoDatabase<AuditLog> collection) : base(collection)
         {
-            _collection = collection;
         }
 
         public async Task<bool> AddAuditLogAsync(AuditLog auditLog)

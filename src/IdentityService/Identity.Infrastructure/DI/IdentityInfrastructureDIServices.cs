@@ -15,7 +15,7 @@ namespace IdentityService.Identity.Infrastructure.DI
         public static IServiceCollection AddIdentityInfrastructureDIServices(this IServiceCollection services)
         {
             services.AddDIEnjectionServices
-            ("IdentityDatabase", new Type[] { typeof(IdentityUser), typeof(Role) });
+            ("IdentityDatabase", new Type[] { typeof(IdentityUser), typeof(Role), typeof(AuditLog) });
             services.AddScoped<IIdentityRepository, IdentityUserRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IAuditRepository, AuditRepository>();

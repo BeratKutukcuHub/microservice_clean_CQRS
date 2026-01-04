@@ -3,6 +3,7 @@ using System.Text;
 using IdentityService.Identity.Domain.Exceptions;
 using IdentityService.Identity.Domain.Helper;
 using AbstractionBlocks.Common.Domain;
+
 namespace IdentityService.Identity.Domain
 {
 
@@ -15,6 +16,9 @@ namespace IdentityService.Identity.Domain
         public List<Guid> RoleIds { get; private set; } = new List<Guid>();
         public bool IsBlocked { get; private set; } = false;
         public List<RefreshToken> RefreshTokens { get; private set; } = new List<RefreshToken>();
+
+        public IReadOnlyList<IEventDomain> Events => throw new NotImplementedException();
+
         private IdentityUser(Guid id, string name, string email, string passwordhash, string passwordsalt)
         {
             Id = id;

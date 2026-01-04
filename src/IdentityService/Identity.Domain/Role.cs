@@ -6,6 +6,8 @@ namespace IdentityService.Identity.Domain
     {
         public List<string> Permissions { get; private set; } = new();
 
+        public IReadOnlyList<IEventDomain> Events => throw new NotImplementedException();
+
         private Role(Guid id, string name)
         {
             Id = id;
