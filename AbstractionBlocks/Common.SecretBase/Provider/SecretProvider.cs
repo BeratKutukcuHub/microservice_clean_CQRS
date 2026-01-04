@@ -9,13 +9,11 @@ namespace AbstractionBlocks.Common.SecretBase.Provider
     {
         private readonly IConfiguration _localConfig;
     
-        // Allow DI to inject IConfiguration (host config) when available
         public SecretProvider(IConfiguration configuration)
         {
             _localConfig = configuration;
         }
 
-        // Fallback for scenarios where IConfiguration isn't provided
         public SecretProvider()
         {
             _localConfig = new ConfigurationBuilder()
@@ -23,13 +21,11 @@ namespace AbstractionBlocks.Common.SecretBase.Provider
                 .AddJsonFile("secretbase.json", optional: true, reloadOnChange: true)
                 .Build();
         }
-
         public TBind GetSection()
         {
             var section = _localConfig.GetSection(typeof(TBind).Name);
             if (!section.Exists())
             {
-                // Try to locate a secretbase.json file in the directory tree and load it if present
                 string? found = null;
                 var dir = AppContext.BaseDirectory;
                 while (!string.IsNullOrEmpty(dir))

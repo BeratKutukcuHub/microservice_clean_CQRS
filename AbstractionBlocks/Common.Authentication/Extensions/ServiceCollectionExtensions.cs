@@ -28,6 +28,15 @@ namespace Shared.Authentication
                         secretProvider.SecretKey))
                 };
             });
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("NotBlocked", policy =>
+                    policy.RequireAssertion(context =>
+                    {
+                        var isBlocked = context.User.FindFirst("IsBlocked")?.Value;
+                        return isBlocked != "true";
+                    }));
+            });
             return services;
         }
     }

@@ -33,7 +33,7 @@ namespace IdentityService.Application.Api.Controller
             var result = await _sender.Send(command);
             return Ok(result);
         }
-
+        [Authorize(Policy = "IsBlocked")]
         [HttpPut("Update")]
         [Authorize]
         public async Task<ActionResult<UpdateIdentityResponse>> Update(UpdateIdentityCommand command)

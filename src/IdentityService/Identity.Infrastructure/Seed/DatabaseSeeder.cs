@@ -20,7 +20,7 @@ namespace IdentityService.Identity.Infrastructure.Seed
                 var adminRole = (await uow.RoleRepository.FindAsync(x => x.Name == "Admin")).FirstOrDefault();
                 if (adminRole == null)
                 {
-                    adminRole = IdentityService.Identity.Domain.Role.Create("Admin");
+                    adminRole = Domain.Role.Create("Admin");
                     adminRole.AddPermission("User.Create");
                     adminRole.AddPermission("User.Delete");
                     adminRole.AddPermission("User.ViewAll");
@@ -30,7 +30,7 @@ namespace IdentityService.Identity.Infrastructure.Seed
                     await uow.RoleRepository.AddAsync(adminRole);
                 }
 
-                var newAdmin = IdentityService.Identity.Domain.IdentityUser.Create("Admin", adminEmail, "Admin123!");
+                var newAdmin = Domain.IdentityUser.Create("Admin", adminEmail, "Admin123!");
                 newAdmin.AddRole(adminRole.Id);
                 await uow.IdentityRepository.AddAsync(newAdmin);
             }

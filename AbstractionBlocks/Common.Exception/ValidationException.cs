@@ -23,23 +23,4 @@ namespace AbstractionBlocks.Common.Exception
         base(message, 400, "VALIDATION_ERROR",
         errors){}
     }
-    public class BadRequestException : BaseDomainException
-    {
-    public BadRequestException(string message = "Bad request") 
-        : base(message, 400, "BAD_REQUEST") { }
-    }
-    public class ForbiddenException : BaseDomainException
-    {
-    public ForbiddenException(string message = "Forbidden") 
-        : base(message, 403, "FORBIDDEN") { }
-    }
-    public class ConflictException : BaseDomainException
-    {
-        public ConflictException(string message = "Resource conflict") 
-            : base(message, 409, "CONFLICT") { }
-    }
-    public class NotFoundException : BaseDomainException
-    {
-        public NotFoundException(string message = "Entity not found") : base(message, 404, "NOT_FOUND"){}
-    }
 }

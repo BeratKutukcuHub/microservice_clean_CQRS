@@ -32,7 +32,6 @@ public class ResponseWrapperMiddleware : IMiddleware
                 return;
             }
 
-            // Read the body
             memoryStream.Position = 0;
             var bodyText = await new StreamReader(memoryStream).ReadToEndAsync();
 

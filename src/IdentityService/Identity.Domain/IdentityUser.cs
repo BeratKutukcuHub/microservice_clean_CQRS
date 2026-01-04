@@ -13,6 +13,7 @@ namespace IdentityService.Identity.Domain
         public string PasswordHash { get; private set; } = string.Empty;
         public string PasswordSalt { get; private set; } = string.Empty;
         public List<Guid> RoleIds { get; private set; } = new List<Guid>();
+        public bool IsBlocked { get; private set; } = false;
         public List<RefreshToken> RefreshTokens { get; private set; } = new List<RefreshToken>();
         private IdentityUser(Guid id, string name, string email, string passwordhash, string passwordsalt)
         {
@@ -37,7 +38,8 @@ namespace IdentityService.Identity.Domain
             }
             throw new UserIsNotValid();
         }
-
+        public void BlockUser() => IsBlocked = true;
+        public void UnblockUser() => IsBlocked = false;
         public IdentityUser UpdateIdentity(string? name, string? email, string? password)
         {
             if (!string.IsNullOrWhiteSpace(name))

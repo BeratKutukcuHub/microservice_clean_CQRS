@@ -18,6 +18,7 @@ namespace IdentityService.Identity.Infrastructure.DI
             ("IdentityDatabase", new Type[] { typeof(IdentityUser), typeof(Role) });
             services.AddScoped<IIdentityRepository, IdentityUserRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IAuditRepository, AuditRepository>();
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             return services;

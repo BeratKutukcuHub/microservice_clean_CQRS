@@ -1,19 +1,21 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using AbstractionBlocks.Common.SecretBase.Options;
+using AbstractionBlocks.Common.SecretBase.Provider;
 using IdentityService.Identity.Domain;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace IdentityService.Application.Helper
 {
-    public class JwtTokenGenerator
+    public class JwtTokenGenerator : IJwtTokenGenerator
     {
-        private IConfiguration _config;
+        private readonly ISecretProvider<JwtOptions> _config;
 
-        public JwtTokenGenerator(IConfiguration config)
+        public JwtTokenGenerator(ISecretProvider<JwtOptions> config)
         {
             _config = config;
         }
+
         private List<Claim> SetClaims(IdentityUser user, IEnumerable<string> permissions)
         {
             List<Claim> claims = new List<Claim>()
@@ -51,7 +53,7 @@ namespace IdentityService.Application.Helper
         public string GenerateToken(IdentityUser user, IEnumerable<string> permissions)
         {
             return new JwtSecurityTokenHandler().WriteToken(
-                CreateToken(_config.GetSection("Jwt:SecretKey").Value ?? string.Empty, SetClaims(user, permissions))
+                CreateToken(_config.GetSection().SecretKey ?? string.Empty, SetClaims(user, permissions))
             );
         }
     }

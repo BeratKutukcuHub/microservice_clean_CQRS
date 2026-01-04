@@ -19,8 +19,6 @@ builder.Logging.ClearProviders();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 builder.Host.UseNLog();
 
-try
-{
 builder.Services.AddControllers();
 builder.Services.AddRouting();
 builder.Services.AddDIEnjectionsSecretBase();
@@ -32,7 +30,6 @@ builder.Services.AddGlobalExceptionHandler();
 builder.Services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
-builder.Services.AddAuthorization();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -65,7 +62,6 @@ builder.Services.AddSwaggerGen(c =>
     var app = builder.Build();
 
     await app.Services.EnsureSeedDataAsync();
-
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<GlobalExceptionHandler>();
 app.UseMiddleware<ResponseWrapperMiddleware>();
@@ -77,14 +73,4 @@ app.MapControllers();
 app.MapSwagger();
 app.UseSwaggerUI();
 app.Run();
-}
-catch (Exception ex)
-{
-    logger.Error(ex, "Stopped program because of exception");
-    throw;
-}
-finally
-{
-    NLog.LogManager.Shutdown();
-}
 

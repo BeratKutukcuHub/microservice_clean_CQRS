@@ -7,7 +7,7 @@ namespace IdentityService.Identity.Infrastructure.Extensions
     public static class GetAllPaginationService
     {
         public static async Task<PaginationResponse<T>?> GetAllPaginationAsync<T>
-        (this IMongoCollection<T> repository, PaginationValue pagination) where T : class, new()
+        (this IMongoCollection<T> repository, PaginationValue pagination) where T : class
         {
             var totalCount = await repository.CountDocumentsAsync(FilterDefinition<T>.Empty);
 
