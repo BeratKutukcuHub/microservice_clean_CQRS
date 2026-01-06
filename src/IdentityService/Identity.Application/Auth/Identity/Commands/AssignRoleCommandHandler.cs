@@ -1,68 +1,64 @@
+
 using AbstractionBlocks.Common.Exception.Logger;
-using AbstractionBlocks.Common.Exception;
-using IdentityService.Application.Interfaces;
-using IdentityService.Identity.Application.Repository;
-using MediatR;
+using IdentityService.Application.Exceptions;
+using IdentityService.Application.Helper;
+using IdentityService.Application.Provider;
+using IdentityService.Application.UOW;
 using IdentityService.Identity.Domain;
+using MediatR;
 
 namespace IdentityService.Application.Auth.Identity.Commands
 {
-    public record AssignRoleCommand(Guid UserId, Guid RoleId) : IRequest<bool>;
-    public class AssignRoleCommandHandler : IRequestHandler<AssignRoleCommand, bool>
+    public record AssignRoleCommand(Guid UserId, Guid RoleId, Guid TargetRoleId) : IRequest<TokenResponse>;
+    public class AssignRoleCommandHandler : IRequestHandler<AssignRoleCommand, TokenResponse>
     {
-        private readonly IIdentityRepository _identityRepository;
-        private readonly IRoleRepository _roleRepository;
-        private readonly IAuditRepository _auditService;
+        private readonly IUnitOfWork _uow;
+        private readonly IApplicationDispatcher _dispatcher;
         private readonly ILoggerService<AssignRoleCommandHandler> _logger;
-        private readonly ICurrentUser _currentUser;
-        public AssignRoleCommandHandler(
-            IIdentityRepository identityRepository,
-            IRoleRepository roleRepository,
-            IAuditRepository auditService,
-            ILoggerService<AssignRoleCommandHandler> logger,
-            ICurrentUser currentUser)
+        private readonly IJwtTokenGenerator _jwtTokenGenerator;
+        public AssignRoleCommandHandler(IUnitOfWork uow, ILoggerService<AssignRoleCommandHandler> logger,
+        IApplicationDispatcher dispatcher, IJwtTokenGenerator jwtTokenGenerator)
         {
-            _identityRepository = identityRepository;
-            _roleRepository = roleRepository;
-            _auditService = auditService;
+            _uow = uow;
             _logger = logger;
-            _currentUser = currentUser;
+            _dispatcher = dispatcher;
+            _jwtTokenGenerator = jwtTokenGenerator;
         }
 
-        public async Task<bool> Handle(AssignRoleCommand request, CancellationToken cancellationToken)
+        public async Task<TokenResponse> Handle(AssignRoleCommand request, CancellationToken cancellationToken)
         {
-            var user = await _identityRepository.GetByIdAsync(request.UserId)
-                ?? throw new NotFoundException($"User with ID {request.UserId} not found.");
-            var role = await _roleRepository.GetByIdAsync(request.RoleId)
-                ?? throw new NotFoundException($"Role with ID {request.RoleId} not found.");
-
-            var alreadyHasRole = user.RoleIds.Contains(role.Id);
-            if (!alreadyHasRole)
-            {
-                user.AddRole(role.Id);
-                await _identityRepository.UpdateAsync(user);
-            }
-
-            await _auditService.AddAuditLogAsync(
-                AuditLog.Create(
-                    "IdentityUser",
-                    user.Id,
-                    "AssignRole",
-                    _currentUser.UserId,
-                    Guid.NewGuid(),
-                    "AssignRoleCommandHandler",
-                    new List<ChangeDetail>
+            var result = await _uow.IdentityUserAssingRoleAsync(request.UserId, request.RoleId, request.TargetRoleId);
+            _logger.Information(
+                "IdentityUser.AssignedRole",
+                new
+                {
+                    ActorId = _uow.CurrentUser.UserId,
+                    TargetId = request.UserId,
+                    RoleId = request.RoleId,
+                    TargetRoleId = request.TargetRoleId,
+                }
+            );
+            var audit = AuditLog.Create(
+                "IdentityUser",
+                request.UserId,
+                "AssignedRole",
+                _uow.CurrentUser.UserId,
+                _uow.CurrentUser.CorrelationId,
+                "AssignRoleCommandHandler",
+                new List<ChangeDetail>
+                {
+                    new ChangeDetail
                     {
-                        new ChangeDetail
-                        {
                         Field = "Role",
-                        OldValue = alreadyHasRole ? role.Name : null,
-                        NewValue = role.Name
-                        }
-                    }));            
-            _logger.Information("Role {RoleName} assigned to user {UserEmail}", Guid.NewGuid(), default);
-
-            return true;
+                        NewValue = request.RoleId.ToString(),
+                        OldValue = request.TargetRoleId.ToString()
+                    }
+                }
+            );
+            audit.AddAuditEvent();
+            await _dispatcher.Dispatch(audit.Events);
+            var token = _jwtTokenGenerator.GenerateToken(result.User, result.Permissions);
+            return new TokenResponse(token, result.User.LastRefreshToken(), DateTime.UtcNow);
         }
     }
 }

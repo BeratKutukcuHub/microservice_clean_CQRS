@@ -5,6 +5,7 @@ using IdentityService.Identity.Application.Repository;
 using IdentityService.Identity.Domain;
 using IdentityService.Identity.Infrastructure.Extensions;
 using MongoDB.Driver;
+using IdentityService.Application.Exceptions;
 
 namespace IdentityService.Identity.Infrastructure.Repositories
 {
@@ -27,5 +28,15 @@ namespace IdentityService.Identity.Infrastructure.Repositories
         }
         public async Task<PaginationResponse<IdentityUser>?> GetAllPagination(PaginationValue paginationValue) =>
         await _collection.Collection.GetAllPaginationAsync(paginationValue);
+        public async Task<IdentityUser> GetByIdSessionAsync(IClientSessionHandle session,Guid id, Guid roleId, Guid oldRoleId)
+        {
+            var user = await _collection.Collection.Find(session, x => x.Id == id).FirstOrDefaultAsync();
+            if (user == null) throw new NotFoundExceptionApp($"IdentityUser with ID {id} not found.");
+            user.RemoveRole(oldRoleId);
+            user.AddRole(roleId);
+            user.AddRefreshToken();
+            await _collection.Collection.ReplaceOneAsync(x => x.Id == id, user);
+            return user;
+        }
     }
 }

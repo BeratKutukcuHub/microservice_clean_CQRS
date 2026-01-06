@@ -18,7 +18,7 @@ namespace IdentityService.Identity.Domain
         public List<RefreshToken> RefreshTokens { get; private set; } = new List<RefreshToken>();
 
         public IReadOnlyList<IEventDomain> Events => throw new NotImplementedException();
-
+        
         private IdentityUser(Guid id, string name, string email, string passwordhash, string passwordsalt)
         {
             Id = id;
@@ -42,13 +42,24 @@ namespace IdentityService.Identity.Domain
             }
             throw new UserIsNotValid();
         }
+        public Guid LastRefreshToken()
+        {
+            return RefreshTokens.LastOrDefault().Token;
+        }
+        public void RemoveRole(Guid roleId)
+        {
+            if (RoleIds.Contains(roleId))
+                RoleIds.Remove(roleId);
+                else throw new UserHasNotRole(roleId);
+        }
         public void BlockUser() => IsBlocked = true;
         public void UnblockUser() => IsBlocked = false;
         public IdentityUser UpdateIdentity(string? name, string? email, string? password)
         {
             if (!string.IsNullOrWhiteSpace(name))
+            {
                 Name = name;
-
+            }
             if (!string.IsNullOrWhiteSpace(email))
             {
                 if (!Checkers.IsValidEmail(email)) throw new UserIsNotValid();
@@ -87,4 +98,6 @@ namespace IdentityService.Identity.Domain
             return newtoken;
         }
     }
+
+    
 }

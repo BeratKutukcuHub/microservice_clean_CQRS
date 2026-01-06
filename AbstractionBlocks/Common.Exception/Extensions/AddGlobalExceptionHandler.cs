@@ -1,46 +1,31 @@
-
 using System.Security.Claims;
 using System.Text.Json;
-using AbstractionBlocks.Common.Exception.Logger;
 using AbstractionBlocks.Common.Exception;
+using AbstractionBlocks.Common.Exception.Logger;
 using Microsoft.AspNetCore.Http;
+
 namespace AbstractionBlocks.DIEnjections
 {
-    public record ResponseExceptions(string message,
-    int statusCode,
-    string errorCode,
-    Dictionary<string, string[]>? errors,
-    string? correlationId);
+    public record ResponseExceptions(
+        string message,
+        int statusCode,
+        string errorCode,
+        Dictionary<string, string[]>? errors,
+        string? correlationId);
 
     public class GlobalExceptionHandler : IMiddleware
     {
         private readonly ILoggerService<GlobalExceptionHandler> _logger;
-        public GlobalExceptionHandler(ILoggerService<GlobalExceptionHandler> logger)
+
+        public GlobalExceptionHandler(
+            ILoggerService<GlobalExceptionHandler> logger)
         {
             _logger = logger;
         }
 
-        private ResponseExceptions MapException(Exception ex)
-        {
-            if (ex is BaseDomainException bde)
-            {
-                return new ResponseExceptions(bde.Message, bde.StatusCode, bde.ErrorCode, bde.Errors, bde.CorrelationId);
-            }
-
-            return new ResponseExceptions(ex.Message, 500, "INTERNAL_SERVER_ERROR", null, null);
-        }
-        private string ExceptionResponser(HttpContext context, ResponseExceptions exMap)
-        {
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = exMap.statusCode;
-            var errors = exMap.errors?.SelectMany(kv => kv.Value.Select(v => $"{kv.Key}: {v}")).ToList()
-             ?? new List<string>();
-            var response = ApiResponse<object>.Error(errors, exMap.statusCode, exMap.correlationId);
-            return JsonSerializer.Serialize(response,
-            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-        }
-
-        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+        public async Task InvokeAsync(
+            HttpContext context,
+            RequestDelegate next)
         {
             try
             {
@@ -48,17 +33,88 @@ namespace AbstractionBlocks.DIEnjections
             }
             catch (Exception ex)
             {
-                var mapEx = MapException(ex);
-                Guid? id = context?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.
-                Value is string val && Guid.TryParse(val, out var guidVal) ? guidVal : null;
+                var mapped = MapException(ex);
 
-                var correlationIdFromItems = context.Items["CorrelationId"] as string;
-                Guid? correlationId = Guid.TryParse(mapEx.correlationId ?? correlationIdFromItems, out var cId) ? cId : (Guid?)null;
+                Guid? userId = GetUserId(context);
 
-                _logger.Error("Unhandled exception: {Message}", ex, id ?? default, correlationId ?? default);
-                var result = ExceptionResponser(context, mapEx);
-                await context.Response.WriteAsync(result);
+                LogException(ex, mapped, userId);
+
+                var responseJson = BuildResponse(context, mapped);
+                await context.Response.WriteAsync(responseJson);
             }
+        }
+
+        private static Guid? GetUserId(HttpContext context)
+        {
+            var value = context.User?
+                .Claims
+                .FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)
+                ?.Value;
+
+            return Guid.TryParse(value, out var id)
+                ? id
+                : null;
+        }
+        private void LogException(
+            Exception ex,
+            ResponseExceptions mapped,
+            Guid? userId)
+        {
+            if (ex is BaseDomainException bde)
+            {
+                _logger.Error(ex, bde.Message);
+            }
+            else
+            {
+                _logger.Error(
+                    exception: ex,
+                    message: "Unhandled exception occurred");
+            }
+        }
+
+        private static ResponseExceptions MapException(Exception ex)
+        {
+            if (ex is BaseDomainException bde)
+            {
+                return new ResponseExceptions(
+                    bde.Message,
+                    bde.StatusCode,
+                    bde.ErrorCode,
+                    bde.Errors,
+                    bde.CorrelationId);
+            }
+
+            return new ResponseExceptions(
+                ex.Message,
+                StatusCodes.Status500InternalServerError,
+                "INTERNAL_SERVER_ERROR",
+                null,
+                null);
+        }
+
+        private static string BuildResponse(
+            HttpContext context,
+            ResponseExceptions exMap)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = exMap.statusCode;
+
+            var errors = exMap.errors?
+                .SelectMany(kv => kv.Value.Select(v => $"{kv.Key}: {v}"))
+                .ToList()
+                ?? new List<string>();
+
+            var response = ApiResponse<object>.Error(
+                errors,
+                exMap.statusCode,
+                exMap.correlationId);
+
+            return JsonSerializer.Serialize(
+                response,
+                new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
         }
     }
 }

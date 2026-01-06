@@ -1,44 +1,42 @@
+using AbstractionBlocks.Common.Exception;
 using AbstractionBlocks.Common.Exception.Logger;
+using IdentityService.Application.Exceptions;
 using IdentityService.Application.Provider;
-using IdentityService.Identity.Application.Repository;
+using IdentityService.Application.UOW;
+using IdentityService.Identity.Domain.Helper;
 using MediatR;
-using IdentityService.Application.Helper;
-using IdentityService.Identity.Domain;
-using IdentityService.Application.Interfaces;
+
 
 namespace IdentityService.Application.Auth.Identity.Commands
 {
     public record LoginCommand(string email, string password) : IRequest<LoginResponse>;
     public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
     {
-        private readonly IIdentityRepository _identityRepository;
-        private readonly IRoleRepository _roleRepository;
+        private readonly IUnitOfWork _uow;
         private readonly ILoggerService<LoginCommandHandler> _logger;
-        private readonly IJwtTokenGenerator _tokenService;
-        private readonly IApplicationDispatcher _dispatcher;
-        private readonly ICurrentUser _currentUser;
-        public LoginCommandHandler(IIdentityRepository identityRepository, IRoleRepository roleRepository, IJwtTokenGenerator tokenService,
-        ILoggerService<LoginCommandHandler> logger, IApplicationDispatcher dispatcher, ICurrentUser currentUser)
+        public LoginCommandHandler(IUnitOfWork uow, ILoggerService<LoginCommandHandler> logger)
         {
-            _identityRepository = identityRepository;
-            _roleRepository = roleRepository;
-            _tokenService = tokenService;
+            _uow = uow;
             _logger = logger;
-            _dispatcher = dispatcher;
-            _currentUser = currentUser;
         }
+
         public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            var user = (await _identityRepository.FindAsync(u => u.Email == request.email)).FirstOrDefault();
-            var roles = await _roleRepository.FindAsync(x => user.RoleIds.Contains(x.Id));
-            var check = roles.Any(x => x.Name == "Admin");
-            _logger.Information("Login successful for: {Email}", default, default);
-            var token = _tokenService.GenerateToken(user, roles.SelectMany(x => x.Permissions));
-            var result = user.RefreshTokens.LastOrDefault();
-            bool isRefreshTokenExist = result is null;
-            Guid refreshToken = isRefreshTokenExist ? user.AddRefreshToken() : result.Token;
-            if(isRefreshTokenExist) await _identityRepository.UpdateAsync(user);
-            return new LoginResponse(token , refreshToken);
+            var result = (await _uow.IdentityRepository.FindAsync(u => u.Email == request.email)).FirstOrDefault();
+            if (result is null) throw new NotFoundExceptionApp(request.email);
+            var isValid = PasswordHasher.VerifyPassword(request.password,
+            Convert.FromBase64String(result.PasswordSalt),
+            Convert.FromBase64String(result.PasswordHash));
+            if (!isValid) throw new BadRequestException("Invalid Password");
+            _logger.Information("IdentityUser.Login", new { ActorId = result.Id });
+            var token = _uow.JwtTokenGenerator.GenerateToken(result, await _uow.RoleRepository.GetAllPermissionsAsync(result.RoleIds));
+            var resultToken = result.LastRefreshToken();
+            if (Guid.Empty == result.LastRefreshToken())
+            {
+                resultToken = result.AddRefreshToken();
+                await _uow.IdentityRepository.UpdateAsync(result);
+            }
+            return new LoginResponse(token, resultToken);
         }
     }
 }

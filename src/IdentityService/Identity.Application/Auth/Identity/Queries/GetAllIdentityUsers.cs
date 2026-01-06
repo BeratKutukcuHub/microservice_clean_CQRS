@@ -3,39 +3,39 @@ using AbstractionBlocks.Common.Pagination;
 using IdentityService.Application.Auth.Identity.Profile;
 using IdentityService.Application.UOW;
 using IdentityService.Identity.Application.Repository;
+using IdentityService.Identity.Domain;
 using MediatR;
 
 namespace IdentityService.Application.Auth.Identity.Queries
 {
-    public record GetAllIdentityUsersCommand(PaginationValue pag) : IRequest<IEnumerable<IdentityUserDto>>;
-    public class GetAllIdentityUsersCommandHandler : IRequestHandler<GetAllIdentityUsersCommand, IEnumerable<IdentityUserDto>>
+    public record GetAllIdentityUsersCommand(PaginationValue pag) : IRequest<PaginationResponse<IdentityUser>>;
+    public class GetAllIdentityUsersCommandHandler : IRequestHandler<GetAllIdentityUsersCommand, PaginationResponse<IdentityUser>>
     {
         private readonly ILoggerService<GetAllIdentityUsersCommandHandler> _logger;
-        private readonly IIdentityRepository _identityRepository;
         private readonly IUnitOfWork _unitOfWork;
-        public GetAllIdentityUsersCommandHandler(IIdentityRepository identityRepository, ILoggerService<GetAllIdentityUsersCommandHandler> logger, IUnitOfWork unitOfWork)
+        private readonly IApplicationDispatcher _dispatcher;
+        public GetAllIdentityUsersCommandHandler(ILoggerService<GetAllIdentityUsersCommandHandler> logger, IUnitOfWork unitOfWork, IApplicationDispatcher dispatcher)
         {
-            _identityRepository = identityRepository;
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _dispatcher = dispatcher;
         }
 
-        public async Task<IEnumerable<IdentityUserDto>> Handle(GetAllIdentityUsersCommand request, CancellationToken cancellationToken)
+        public async Task<PaginationResponse<IdentityUser>> Handle(GetAllIdentityUsersCommand request, CancellationToken cancellationToken)
         {
-            var results = await _identityRepository.GetAllPagination(request.pag);
-
-            var currentUserId = _unitOfWork.CurrentUser?.IsAuthenticated == true
-                ? _unitOfWork.CurrentUser.UserId
-                : Guid.Empty;
-
-            _logger.Information($"IdentityUsers found. Count: {results.Data.Count}", currentUserId);
-
-            return results.Data.Select
-            (x => new IdentityUserDto(x.Id,
-            x.Name,
-            x.Email,
-            x.RoleIds?.Select(x => x.ToString()) ?? Enumerable.Empty<string>(),
-            x.CreatedAt));
+            var result = await _unitOfWork.IdentityRepository.GetAllPagination(request.pag);
+            var audit = AuditLog.Create(
+                "IdentityUser",
+                null,
+                "GetAll",
+                _unitOfWork.CurrentUser.UserId,
+                _unitOfWork.CurrentUser.CorrelationId,
+                "GetAllIdentityUsersCommandHandler",
+                null
+            );
+            audit.AddAuditEvent();
+            await _dispatcher.Dispatch(audit.Events);
+            return result;
         }
     }
 }

@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Authentication.Security;
+using IdentityService.Identity.Application.Auth.Identity.Commands;
 
 namespace IdentityService.Application.Api.Controller
 {
@@ -33,10 +34,16 @@ namespace IdentityService.Application.Api.Controller
             var result = await _sender.Send(command);
             return Ok(result);
         }
+        [HttpGet("RefreshToken")]
+        public async Task<ActionResult> RefreshToken([FromQuery] RefreshTokenCommand command)
+        {
+            var result = await _sender.Send(command);
+            return Ok(result);
+        }
         [Authorize(Policy = "IsBlocked")]
         [HttpPut("Update")]
         [Authorize]
-        public async Task<ActionResult<UpdateIdentityResponse>> Update(UpdateIdentityCommand command)
+        public async Task<ActionResult> Update(UpdateIdentityCommand command)
         {
             var result = await _sender.Send(command);
             return Ok(result);
@@ -44,12 +51,19 @@ namespace IdentityService.Application.Api.Controller
 
         [HttpDelete("Delete/{Id}")]
         [HasPermission("User.Delete")]
+        [Authorize]
         public async Task<ActionResult<bool>> Delete(Guid Id)
         {
             var result = await _sender.Send(new DeleteIdentityUserCommand(Id));
             return Ok(result);
         }
-
+        [HttpPost("Block/{Id}")]
+        [HasPermission("User.Update")]
+        public async Task<ActionResult<bool>> Block(Guid Id)
+        {
+            var result = await _sender.Send(new BlockUserCommand(Id));
+            return Ok(result);
+        }
         [HttpGet("GetById/{Id}")]
         [Authorize]
         public async Task<ActionResult<IdentityUserDto>> GetById(Guid Id)

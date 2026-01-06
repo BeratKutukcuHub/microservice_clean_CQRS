@@ -2,6 +2,7 @@ using AbstractionBlocks.Common.Exception.Logger;
 using AbstractionBlocks.Common.Exception;
 using IdentityService.Identity.Application.Repository;
 using MediatR;
+using IdentityService.Application.UOW;
 
 namespace IdentityService.Application.Auth.Role.Commands
 {
@@ -9,25 +10,30 @@ namespace IdentityService.Application.Auth.Role.Commands
 
     public class RemovePermissionFromRoleCommandHandler : IRequestHandler<RemovePermissionFromRoleCommand, bool>
     {
-        private readonly IRoleRepository _roleRepository;
+        private readonly IUnitOfWork _uow;
         private readonly ILoggerService<RemovePermissionFromRoleCommandHandler> _logger;
 
-        public RemovePermissionFromRoleCommandHandler(IRoleRepository roleRepository, ILoggerService<RemovePermissionFromRoleCommandHandler> logger)
+        public RemovePermissionFromRoleCommandHandler(ILoggerService<RemovePermissionFromRoleCommandHandler> logger, IUnitOfWork uow)
         {
-            _roleRepository = roleRepository;
             _logger = logger;
+            _uow = uow;
         }
 
         public async Task<bool> Handle(RemovePermissionFromRoleCommand request, CancellationToken cancellationToken)
         {
-            var role = await _roleRepository.GetByIdAsync(request.RoleId);
+            var role = await _uow.RoleRepository.GetByIdAsync(request.RoleId);
             if (role == null)
                 throw new NotFoundException($"Role with ID {request.RoleId} not found.");
 
             role.RemovePermission(request.Permission);
-            await _roleRepository.UpdateAsync(role);
+            await _uow.RoleRepository.UpdateAsync(role);
 
-            _logger.Information($"Permission {request.Permission} removed from role {role.Name}", role.Id);
+            _logger.Information("Role.PermissionRemoved", new
+            {
+                Action = "Remove",
+                ActorId = _uow.CurrentUser.UserId,
+                TargetId = role.Id
+            });
             return true;
         }
     }

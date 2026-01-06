@@ -21,7 +21,7 @@ namespace IdentityService.Application.Auth.Role.Queries
         public async Task<IEnumerable<RoleDto>> Handle(GetAllRolesQuery request, CancellationToken cancellationToken)
         {
             var roles = await _uow.RoleRepository.GetAllAsync();
-            _logger.Information("Roles retrieved. Count: {Count}, RequestedBy: {UserId}", _uow.CurrentUser.UserId, Guid.Empty);
+            _logger.Information("Roles.GetAll", new { ActorId = _uow.CurrentUser.UserId });
             return roles.Select(r => new RoleDto(r.Id, r.Name, r.Permissions));
         }
     }

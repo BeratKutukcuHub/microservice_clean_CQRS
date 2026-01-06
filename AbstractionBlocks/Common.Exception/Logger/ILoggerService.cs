@@ -1,10 +1,26 @@
+using System;
+
 namespace AbstractionBlocks.Common.Exception.Logger
 {
-    public interface ILoggerService<TLogCategory> where TLogCategory : class
+    public interface ILoggerService<TLogCategory>
+        where TLogCategory : class
     {
-        void Information(string message, Guid id, Guid? correlationId = null);
-        void Error(string message, System.Exception ex, Guid id, Guid? correlationId = null);
-        void Warning(string message, Guid id, string reason, Guid? correlationId = null);
-        void Warning(string message, string email, string reason, Guid? correlationId = null);
+        void Information(
+            string message,
+            object? context = null);
+
+        void Warning(
+            string message,
+            object? context = null);
+
+        void Warning(
+            System.Exception exception,
+            string message,
+            object? context = null);
+
+        void Error(
+            System.Exception exception,
+            string message,
+            object? context = null);
     }
-} 
+}

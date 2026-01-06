@@ -20,7 +20,12 @@ namespace IdentityService.Application.Auth.Role.Commands
         public async Task<bool> Handle(DeleteRoleCommand request, CancellationToken cancellationToken)
         {
             await _uow.RoleRepository.DeleteAsync(request.Id);
-            _logger.Information("Role deleted. Id: {RoleId}, DeletedBy: {UserId}", request.Id, _uow.CurrentUser.UserId);
+            _logger.Information("Role.Deleted", new
+            {
+                Action = "Delete",
+                ActorId = _uow.CurrentUser.UserId,
+                TargetId = request.Id
+            });
             return true;
         }
     }

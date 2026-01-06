@@ -4,7 +4,7 @@ using IdentityService.Identity.Domain.Events;
 
 namespace IdentityService.Application.Auth.Identity.Events
 {
-    public class AuditLogEventHandler : IAuditLogEventHandler
+    public class AuditLogEventHandler : IEventApplicationHandler<AuditLogEventDomain>
     {
         private readonly IAuditRepository _auditRepository;
 

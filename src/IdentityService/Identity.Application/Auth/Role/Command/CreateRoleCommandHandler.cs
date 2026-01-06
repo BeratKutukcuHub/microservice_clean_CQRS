@@ -22,9 +22,8 @@ namespace IdentityService.Application.Auth.Role.Commands
         {
             var role = IdentityService.Identity.Domain.Role.Create(request.Name);
             await _uow.RoleRepository.AddAsync(role);
-
-            _logger.Information("Role created. Name: {RoleName}, CreatedBy: {UserId}", role.Id, _uow.CurrentUser.UserId);
-
+            _logger.Information("Role.Created", new { ActorId = _uow.CurrentUser.UserId, TargetId = role.Id });
+            
             return new RoleDto(role.Id, role.Name, role.Permissions);
         }
     }

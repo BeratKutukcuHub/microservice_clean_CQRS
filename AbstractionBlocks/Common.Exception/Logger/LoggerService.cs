@@ -1,45 +1,77 @@
-
-using AbstractionBlocks.Common.Exception.Logger;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace AbstractionBlocks.Common.Exception.Logger
 {
     public class LoggerService<TLogCategory> :
-    ILoggerService<TLogCategory> where TLogCategory : class
+        ILoggerService<TLogCategory>
+        where TLogCategory : class
     {
         private readonly ILogger<TLogCategory> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public LoggerService(ILogger<TLogCategory> logger, IHttpContextAccessor httpContextAccessor)
+        public LoggerService(
+            ILogger<TLogCategory> logger,
+            IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
         }
 
-        private Guid? GetCorrelationId()
+        public void Information(string message, object? context = null)
         {
-            var context = _httpContextAccessor.HttpContext;
-            if (context != null && context.Items.TryGetValue("CorrelationId", out var correlationIdObj))
+            using (CreateScope(context))
             {
-                if (correlationIdObj is string correlationIdStr && Guid.TryParse(correlationIdStr, out var correlationId))
-                {
-                    return correlationId;
-                }
+                _logger.LogInformation(message);
             }
-            return null;
         }
 
-        public void Error(string message, System.Exception ex, Guid id, Guid? correlationId = null)
-        => _logger.LogError(ex, message, id, correlationId ?? GetCorrelationId());
+        public void Warning(string message, object? context = null)
+        {
+            using (CreateScope(context))
+            {
+                _logger.LogWarning(message);
+            }
+        }
 
-        public void Information(string message, Guid id, Guid? correlationId = null)
-        => _logger.LogInformation(message, id, correlationId ?? GetCorrelationId());
+        public void Warning(System.Exception exception, string message, object? context = null)
+        {
+            using (CreateScope(context))
+            {
+                _logger.LogWarning(exception, message);
+            }
+        }
 
-        public void Warning(string message, Guid id, string reason, Guid? correlationId = null)
-        => _logger.LogWarning(message, id, reason, correlationId ?? GetCorrelationId());
+        public void Error(System.Exception exception, string message, object? context = null)
+        {
+            using (CreateScope(context))
+            {
+                _logger.LogError(exception, message);
+            }
+        }
 
-        public void Warning(string message, string email, string reason, Guid? correlationId = null)
-        => _logger.LogWarning(message, email, reason, correlationId ?? GetCorrelationId());
+        private IDisposable CreateScope(object? context)
+        {
+            return _logger.BeginScope(new
+            {
+                context,
+                correlationId = GetCorrelationId()
+            });
+        }
+
+        private Guid? GetCorrelationId()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext?.Items.TryGetValue("CorrelationId", out var value) == true
+                && value is string correlationIdStr
+                && Guid.TryParse(correlationIdStr, out var correlationId))
+            {
+                return correlationId;
+            }
+
+            return null;
+        }
     }
 }

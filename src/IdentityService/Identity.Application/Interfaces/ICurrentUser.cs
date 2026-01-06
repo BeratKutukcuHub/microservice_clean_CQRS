@@ -5,5 +5,6 @@ namespace IdentityService.Application.Interfaces
         Guid UserId { get; }
         string? Email { get; }
         bool IsAuthenticated { get; }
+        public Guid CorrelationId { get; }
     }
 }
