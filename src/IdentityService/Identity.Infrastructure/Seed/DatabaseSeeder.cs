@@ -2,7 +2,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using IdentityService.Application.UOW;
-
 namespace IdentityService.Identity.Infrastructure.Seed
 {
     public static class DatabaseSeeder
@@ -12,7 +11,6 @@ namespace IdentityService.Identity.Infrastructure.Seed
             using var scope = services.CreateScope();
             var provider = scope.ServiceProvider;
             var uow = provider.GetRequiredService<IUnitOfWork>();
-
             var adminEmail = "admin@example.com";
             var adminUser = (await uow.IdentityRepository.FindAsync(x => x.Email == adminEmail)).FirstOrDefault();
             if (adminUser == null)
@@ -29,7 +27,6 @@ namespace IdentityService.Identity.Infrastructure.Seed
                     adminRole.AddPermission("Role.ViewAll");
                     await uow.RoleRepository.AddAsync(adminRole);
                 }
-
                 var newAdmin = Domain.IdentityUser.Create("Admin", adminEmail, "Admin123!");
                 newAdmin.AddRole(adminRole.Id);
                 await uow.IdentityRepository.AddAsync(newAdmin);

@@ -5,24 +5,23 @@ using IdentityService.Application.UOW;
 using IdentityService.Identity.Domain;
 using MediatR;
 using Microsoft.Extensions.Logging;
-
+using AbstractionBlocks.Common.Application.Interfaces;
+using AbstractionBlocks.Common.Domain;
 namespace IdentityService.Application.Auth.Identity.Commands
 {
-    public class UpdateIdentityCommand : IRequest<UpdateIdentityResponse> 
+    public class UpdateIdentityCommand : IRequest<UpdateIdentityResponse>
     {
         public Guid Id { get; set; }
         public string? Name { get; set; } = string.Empty;
         public string? Email { get; set; } = string.Empty;
         public string? Password { get; set; } = string.Empty;
-    } 
-    
+    }
     public class UpdateIdentityCommandHandler : IRequestHandler<UpdateIdentityCommand, UpdateIdentityResponse>
     {
-        private readonly IUnitOfWork _uow;
+        private readonly IdentityService.Application.UOW.IUnitOfWork _uow;
         private readonly ILoggerService<UpdateIdentityCommandHandler> _logger;
         private readonly IApplicationDispatcher _dispatcher;
-
-        public UpdateIdentityCommandHandler(IUnitOfWork uow, ILoggerService<UpdateIdentityCommandHandler> logger, IApplicationDispatcher dispatcher)
+        public UpdateIdentityCommandHandler(IdentityService.Application.UOW.IUnitOfWork uow, ILoggerService<UpdateIdentityCommandHandler> logger, IApplicationDispatcher dispatcher)
         {
             _uow = uow;
             _logger = logger;
@@ -49,12 +48,13 @@ namespace IdentityService.Application.Auth.Identity.Commands
                 TargetId = request.Id
             });
             var response = await _uow.IdentityRepository.UpdateAsync(updated);
+            var changes = new List<ChangeDetail>();
+            if (request.Name is not null)
+                changes.Add(new ChangeDetail { Field = "Name", NewValue = request.Name, OldValue = result.Name });
+            if (request.Email is not null)
+                changes.Add(new ChangeDetail { Field = "Email", NewValue = request.Email, OldValue = result.Email });
             var audit = AuditLog.Create("IdentityUser", request.Id, "Update", _uow.CurrentUser.UserId, _uow.CurrentUser.CorrelationId,
-            "UpdateIdentityCommandHandler", new List<ChangeDetail>
-            {
-                request.Name is not null? new ChangeDetail { Field = "Name", NewValue = request.Name, OldValue = result.Name } : null,
-                request.Email is not null? new ChangeDetail { Field = "Email", NewValue = request.Email, OldValue = result.Email } : null,
-            });
+            "UpdateIdentityCommandHandler", changes);
             audit.AddAuditEvent();
             await _dispatcher.Dispatch(audit.Events);
             return new UpdateIdentityResponse(response.Id, response.Name, response.Email);

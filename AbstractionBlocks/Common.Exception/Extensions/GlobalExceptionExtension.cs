@@ -11,6 +11,5 @@ namespace AbstractionBlocks.DIEnjections
             app.AddTransient<CorrelationIdMiddleware>();
             return app;
         }
-
     }
 }

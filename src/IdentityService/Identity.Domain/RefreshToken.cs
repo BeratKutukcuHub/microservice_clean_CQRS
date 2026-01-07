@@ -6,7 +6,6 @@ namespace IdentityService.Identity.Domain
         public DateTime Expiry { get; private set; }
         public bool IsRevoked { get; private set; } = false;
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
-
         private RefreshToken(Guid token, DateTime expiry)
         {
             Token = token;

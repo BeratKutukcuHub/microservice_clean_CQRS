@@ -8,7 +8,6 @@ namespace AbstractionBlocks.Common.Exception
         public string ErrorCode { get; protected set; } = string.Empty;
         public Dictionary<string, string[]>? Errors { get; protected set; }
         public string? CorrelationId { get; set; }
-
         protected BaseDomainException(string message, int statusCode = 500,
         string errorCode = "DOMAIN_ERROR", Guid? entityId = null, Guid? targetId = null,
         Dictionary<string, string[]>? errors = null)

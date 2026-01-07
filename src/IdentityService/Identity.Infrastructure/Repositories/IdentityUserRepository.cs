@@ -6,7 +6,6 @@ using IdentityService.Identity.Domain;
 using IdentityService.Identity.Infrastructure.Extensions;
 using MongoDB.Driver;
 using IdentityService.Application.Exceptions;
-
 namespace IdentityService.Identity.Infrastructure.Repositories
 {
     public class IdentityUserRepository : Repository<IdentityUser>, IIdentityRepository
@@ -18,7 +17,6 @@ namespace IdentityService.Identity.Infrastructure.Repositories
         private void EnsureIndexes()
         {
             var indexKeys = Builders<IdentityUser>.IndexKeys.Ascending(x => x.Email);
-
             var indexOptions = new CreateIndexOptions
             {
                 Unique = true

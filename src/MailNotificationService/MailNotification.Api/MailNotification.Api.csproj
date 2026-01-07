@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="6.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\AbstractionBlocks\Common.Infrastructure\Logging\nlog.config" Link="nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MailNotification.Application\MailNotification.Application.csproj" />
+    <ProjectReference Include="..\MailNotification.Infrastructure\MailNotification.Infrastructure.csproj" />
+    <ProjectReference Include="..\MailNotification.Domain\MailNotification.Domain.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Exception\Common.Exception.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.SecretBase\Common.SecretBase.csproj" />
+  </ItemGroup>
+
+</Project>

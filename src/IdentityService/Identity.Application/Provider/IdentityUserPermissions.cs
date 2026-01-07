@@ -1,5 +1,4 @@
 using IdentityService.Identity.Domain;
-
 namespace IdentityService.Identity.Application.Provider
 {
     public class IdentityUserPermissions

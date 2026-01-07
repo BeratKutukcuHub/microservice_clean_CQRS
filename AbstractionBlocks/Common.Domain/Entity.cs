@@ -3,7 +3,7 @@ namespace AbstractionBlocks.Common.Domain
     public class Entity
     {
         public Guid Id { get; protected set; }
-        public string Name { get; protected set; }
+        public string? Name { get; protected set; }
         public DateTime CreatedAt { get; protected set; }
         public Guid CreateById { get; protected set; }
         public DateTime? UpdatedAt { get; protected set; }

@@ -6,7 +6,7 @@ namespace AbstractionBlocks.Common.Pagination
         public int? PageSize { get; private set; }
         public int? TotalCount { get; private set; }
         public int? TotalPages { get; private set; }
-        public List<T>? Data { get; private set; } = new();
+        public List<T>? Data { get; set; } = new();
         private PaginationResponse(int? pageNumber, int? pageSize, int? totalCount, int? totalPages
         , List<T>? data)
         {

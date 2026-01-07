@@ -1,19 +1,15 @@
 using System.Text.Json;
 using AbstractionBlocks.Common.SecretBase.Options;
 using Microsoft.Extensions.Configuration;
-
 namespace AbstractionBlocks.Common.SecretBase.Provider
 {
-    
     public class SecretProvider<TBind> : ISecretProvider<TBind> where TBind : IJsonOption
     {
         private readonly IConfiguration _localConfig;
-    
         public SecretProvider(IConfiguration configuration)
         {
             _localConfig = configuration;
         }
-
         public SecretProvider()
         {
             _localConfig = new ConfigurationBuilder()
@@ -39,7 +35,6 @@ namespace AbstractionBlocks.Common.SecretBase.Provider
                     var parent = Directory.GetParent(dir);
                     dir = parent?.FullName;
                 }
-
                 if (found != null)
                 {
                     var fileConfig = new ConfigurationBuilder()
@@ -48,11 +43,9 @@ namespace AbstractionBlocks.Common.SecretBase.Provider
                         .Build();
                     section = fileConfig.GetSection(typeof(TBind).Name);
                 }
-
                 if (!section.Exists())
                     throw new Exception($"Section '{typeof(TBind).Name}' not found");
             }
-
             var result = section.Get<TBind>();
             if (result == null)
                 throw new Exception($"Section '{typeof(TBind).Name}' could not be bound to {typeof(TBind).Name}");

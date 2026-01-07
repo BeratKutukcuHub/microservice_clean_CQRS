@@ -7,6 +7,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="..\..\..\AbstractionBlocks\Common.Infrastructure\Logging\nlog.config" Link="nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="NLog.Web.AspNetCore" Version="6.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
   </ItemGroup>

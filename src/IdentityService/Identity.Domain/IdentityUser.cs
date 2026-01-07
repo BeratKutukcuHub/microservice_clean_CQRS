@@ -3,10 +3,9 @@ using System.Text;
 using IdentityService.Identity.Domain.Exceptions;
 using IdentityService.Identity.Domain.Helper;
 using AbstractionBlocks.Common.Domain;
-
+using System.Text.Json.Serialization;
 namespace IdentityService.Identity.Domain
 {
-
     public class IdentityUser : Entity, IAggregateRoot
     {
         public IdentityUser() { }
@@ -16,9 +15,9 @@ namespace IdentityService.Identity.Domain
         public List<Guid> RoleIds { get; private set; } = new List<Guid>();
         public bool IsBlocked { get; private set; } = false;
         public List<RefreshToken> RefreshTokens { get; private set; } = new List<RefreshToken>();
-
-        public IReadOnlyList<IEventDomain> Events => throw new NotImplementedException();
-        
+        private List<IEventDomain> _events = new List<IEventDomain>();
+        [JsonIgnore]
+        public IReadOnlyList<IEventDomain> Events => _events;
         private IdentityUser(Guid id, string name, string email, string passwordhash, string passwordsalt)
         {
             Id = id;
@@ -31,7 +30,6 @@ namespace IdentityService.Identity.Domain
         }
         public static IdentityUser Create(string name, string email, string passwordhash)
         {
-
             if (Checkers.IsValidEmail(email) &&
             Checkers.IsValidPassword(passwordhash))
             {
@@ -77,7 +75,6 @@ namespace IdentityService.Identity.Domain
             UpdatedById = Id;
             return this;
         }
-
         public void SoftDelete() => IsDeleted = true;
         public void AddRole(Guid RoleId)
         {
@@ -98,6 +95,4 @@ namespace IdentityService.Identity.Domain
             return newtoken;
         }
     }
-
-    
 }

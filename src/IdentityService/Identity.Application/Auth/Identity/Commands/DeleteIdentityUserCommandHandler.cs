@@ -1,32 +1,30 @@
-
 using AbstractionBlocks.Common.Exception.Logger;
 using IdentityService.Application.Exceptions;
 using IdentityService.Application.UOW;
 using IdentityService.Identity.Domain;
 using MediatR;
-
+using AbstractionBlocks.Common.Application.Interfaces;
+using AbstractionBlocks.Common.Domain;
 namespace IdentityService.Application.Auth.Identity.Commands
 {
     public record DeleteIdentityUserCommand(Guid Id, bool IsSoftDelete = false) : IRequest<bool>;
     public class DeleteIdentityUserCommandHandler : IRequestHandler<DeleteIdentityUserCommand, bool>
     {
-        private readonly IUnitOfWork _uow;
+        private readonly IdentityService.Application.UOW.IUnitOfWork _uow;
         private readonly ILoggerService<DeleteIdentityUserCommandHandler> _logger;
         private readonly IApplicationDispatcher _dispatcher;
-
-        public DeleteIdentityUserCommandHandler(IUnitOfWork uow, ILoggerService<DeleteIdentityUserCommandHandler> logger,
+        public DeleteIdentityUserCommandHandler(IdentityService.Application.UOW.IUnitOfWork uow, ILoggerService<DeleteIdentityUserCommandHandler> logger,
         IApplicationDispatcher dispatcher)
         {
             _uow = uow;
             _logger = logger;
             _dispatcher = dispatcher;
         }
-
         public async Task<bool> Handle(DeleteIdentityUserCommand request, CancellationToken cancellationToken)
         {
             var result = await _uow.IdentityRepository.GetByIdAsync(request.Id);
-            AuditLog auditLog = null;
-            if(result is null) throw new NotFoundExceptionApp(request.Id.ToString());
+            if (result is null) throw new NotFoundExceptionApp(request.Id.ToString());
+            AuditLog auditLog;
             if (request.IsSoftDelete)
             {
                 result.SoftDelete();
@@ -51,7 +49,7 @@ namespace IdentityService.Application.Auth.Identity.Commands
             else
             {
                 await _uow.IdentityRepository.DeleteAsync(request.Id);
-                _logger.Information("IdentityUser.HardDelete",new { ActorId = _uow.CurrentUser.UserId, TargetId = request.Id });
+                _logger.Information("IdentityUser.HardDelete", new { ActorId = _uow.CurrentUser.UserId, TargetId = request.Id });
                 auditLog = AuditLog.Create("IdentityUser",
                 request.Id,
                 "Delete",

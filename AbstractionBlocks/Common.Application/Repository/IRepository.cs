@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-
 namespace AbstractionBlocks.Common.Application.Repository
 {
     public interface IRepository<TEntity>

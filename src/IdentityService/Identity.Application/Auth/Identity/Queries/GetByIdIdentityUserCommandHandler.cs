@@ -1,26 +1,28 @@
+using AbstractionBlocks.Common.Application.Interfaces;
+using AbstractionBlocks.Common.Domain;
 using AbstractionBlocks.Common.Exception.Logger;
+using AbstractionBlocks.Common.Application.Caching;
 using AutoMapper;
 using IdentityService.Application.Auth.Identity.Profile;
 using IdentityService.Application.Exceptions;
 using IdentityService.Application.UOW;
 using IdentityService.Identity.Domain;
 using MediatR;
-
 namespace IdentityService.Application.Auth.Identity.Queries
 {
+    [Cache("IdentityUser", 2)]
     public record GetByIdIdentityCommand(Guid Id) : IRequest<IdentityUserDto>;
     public class GetByIdIdentityUserCommandHandler : IRequestHandler<GetByIdIdentityCommand, IdentityUserDto>
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IdentityService.Application.UOW.IUnitOfWork _unitOfWork;
         private readonly ILoggerService<GetByIdIdentityUserCommandHandler> _logger;
         private readonly IApplicationDispatcher _dispatcher;
-        public GetByIdIdentityUserCommandHandler(IUnitOfWork unitOfWork, ILoggerService<GetByIdIdentityUserCommandHandler> logger, IApplicationDispatcher dispatcher)
+        public GetByIdIdentityUserCommandHandler(IdentityService.Application.UOW.IUnitOfWork unitOfWork, ILoggerService<GetByIdIdentityUserCommandHandler> logger, IApplicationDispatcher dispatcher)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dispatcher = dispatcher;
         }
-
         public async Task<IdentityUserDto> Handle(GetByIdIdentityCommand request, CancellationToken cancellationToken)
         {
             var result = await _unitOfWork.IdentityRepository.GetByIdAsync(request.Id);

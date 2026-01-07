@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Authentication.Security;
 using IdentityService.Identity.Application.Auth.Identity.Commands;
-
 namespace IdentityService.Application.Api.Controller
 {
     [ApiController]
@@ -15,19 +14,16 @@ namespace IdentityService.Application.Api.Controller
     public class IdentityUserController : ControllerBase
     {
         private readonly ISender _sender;
-
         public IdentityUserController(ISender sender)
         {
             _sender = sender;
         }
-
         [HttpPost("Login")]
         public async Task<ActionResult<LoginResponse>> Login(LoginCommand command)
         {
             var result = await _sender.Send(command);
             return Ok(result);
         }
-
         [HttpPost("Register")]
         public async Task<ActionResult<Guid>> Register(CreateIdentityCommand command)
         {
@@ -48,10 +44,8 @@ namespace IdentityService.Application.Api.Controller
             var result = await _sender.Send(command);
             return Ok(result);
         }
-
         [HttpDelete("Delete/{Id}")]
         [HasPermission("User.Delete")]
-        [Authorize]
         public async Task<ActionResult<bool>> Delete(Guid Id)
         {
             var result = await _sender.Send(new DeleteIdentityUserCommand(Id));
@@ -66,14 +60,15 @@ namespace IdentityService.Application.Api.Controller
         }
         [HttpGet("GetById/{Id}")]
         [Authorize]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
         public async Task<ActionResult<IdentityUserDto>> GetById(Guid Id)
         {
             var result = await _sender.Send(new GetByIdIdentityCommand(Id));
             return Ok(result);
         }
-
         [HttpGet("GetAll")]
         [HasPermission("User.ViewAll")]
+        [ResponseCache(Duration = 120, Location = ResponseCacheLocation.Any, NoStore = false)]
         public async Task<ActionResult<IEnumerable<IdentityUserDto>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 50)
         {
             var pagination = new AbstractionBlocks.Common.Pagination.PaginationValue
@@ -94,4 +89,3 @@ namespace IdentityService.Application.Api.Controller
         }
     }
 }
-

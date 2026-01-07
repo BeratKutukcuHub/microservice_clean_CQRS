@@ -1,7 +1,6 @@
 using AbstractionBlocks.Common;
 using AbstractionBlocks.Common.Pagination;
 using MongoDB.Driver;
-
 namespace IdentityService.Identity.Infrastructure.Extensions
 {
     public static class GetAllPaginationService
@@ -10,15 +9,12 @@ namespace IdentityService.Identity.Infrastructure.Extensions
         (this IMongoCollection<T> repository, PaginationValue pagination) where T : class
         {
             var totalCount = await repository.CountDocumentsAsync(FilterDefinition<T>.Empty);
-
             var skip = (pagination.PageNumber - 1) * pagination.PageSize;
-        
             var items = await repository
                 .Find(FilterDefinition<T>.Empty)
                 .Skip(skip)
                 .Limit(pagination.PageSize)
                 .ToListAsync();
-        
             return PaginationResponse<T>.Create(
                 pagination.PageNumber,
                 pagination.PageSize,

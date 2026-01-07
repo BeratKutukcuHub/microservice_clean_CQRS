@@ -1,5 +1,4 @@
 using IdentityService.Identity.Domain;
-
 namespace IdentityService.Application.Helper
 {
     public interface IJwtTokenGenerator

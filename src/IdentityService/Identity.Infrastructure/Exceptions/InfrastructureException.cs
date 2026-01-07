@@ -1,5 +1,4 @@
 using AbstractionBlocks.Common.Exception;
-
 namespace IdentityService.Identity.Infrastructure.Exceptions
 {
     public abstract class InfrastructureException : BaseDomainException
@@ -9,18 +8,15 @@ namespace IdentityService.Identity.Infrastructure.Exceptions
         {
         }
     }
-
     public class DatabaseOperationException : InfrastructureException
     {
         public DatabaseOperationException(string message, Exception innerException)
             : base(message, 500, "DATABASE_ERROR")
         {
         }
-
         public DatabaseOperationException(string message)
             : base(message, 500, "DATABASE_ERROR")
         {
         }
     }
 }
-

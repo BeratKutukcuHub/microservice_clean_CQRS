@@ -5,21 +5,18 @@ using IdentityService.Application.Provider;
 using IdentityService.Application.UOW;
 using IdentityService.Identity.Domain.Helper;
 using MediatR;
-
-
 namespace IdentityService.Application.Auth.Identity.Commands
 {
     public record LoginCommand(string email, string password) : IRequest<LoginResponse>;
     public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
     {
-        private readonly IUnitOfWork _uow;
+        private readonly IdentityService.Application.UOW.IUnitOfWork _uow;
         private readonly ILoggerService<LoginCommandHandler> _logger;
-        public LoginCommandHandler(IUnitOfWork uow, ILoggerService<LoginCommandHandler> logger)
+        public LoginCommandHandler(IdentityService.Application.UOW.IUnitOfWork uow, ILoggerService<LoginCommandHandler> logger)
         {
             _uow = uow;
             _logger = logger;
         }
-
         public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
             var result = (await _uow.IdentityRepository.FindAsync(u => u.Email == request.email)).FirstOrDefault();

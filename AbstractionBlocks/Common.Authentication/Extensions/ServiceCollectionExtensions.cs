@@ -4,7 +4,6 @@ using AbstractionBlocks.Common.SecretBase.Provider;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-
 namespace Shared.Authentication
 {
     public static class ServiceCollectionExtensions

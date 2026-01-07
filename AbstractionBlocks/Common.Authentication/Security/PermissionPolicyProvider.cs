@@ -1,24 +1,17 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
-
 namespace AbstractionBlocks.Common.Authentication.Security
 {
     public class PermissionPolicyProvider : IAuthorizationPolicyProvider
     {
         public DefaultAuthorizationPolicyProvider FallbackPolicyProvider { get; }
-
-        // Newer IAuthorizationPolicyProvider contracts include AllowsCachingPolicies; implement and forward to the fallback
         public bool AllowsCachingPolicies => true;
-
         public PermissionPolicyProvider(IOptions<AuthorizationOptions> options)
         {
             FallbackPolicyProvider = new DefaultAuthorizationPolicyProvider(options);
         }
-
         public Task<AuthorizationPolicy> GetDefaultPolicyAsync() => FallbackPolicyProvider.GetDefaultPolicyAsync();
-
         public Task<AuthorizationPolicy?> GetFallbackPolicyAsync() => FallbackPolicyProvider.GetFallbackPolicyAsync();
-
         public Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
         {
             var policy = new AuthorizationPolicyBuilder();

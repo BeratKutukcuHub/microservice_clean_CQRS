@@ -7,7 +7,6 @@ namespace AbstractionBlocks.Common.Exception
         public List<string>? Errors { get; init; }
         public string? CorrelationId { get; init; } 
         public int StatusCode { get; init; }
-
         private ApiResponse(TData? data, bool success, List<string>? errors, int statusCode, string correlationId)
         {
             Data = data;
@@ -18,7 +17,6 @@ namespace AbstractionBlocks.Common.Exception
         }
         public static ApiResponse<TData> Success(TData? data, string correlationId, int statusCode)
         => new(data, true, null, statusCode, correlationId);
-
         public static ApiResponse<TData> Error(List<string>? errors, int statusCode, string correlationId) 
         => new(default, false, errors, statusCode, correlationId);
     }

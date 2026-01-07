@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
 using Konscious.Security.Cryptography;
-
 namespace IdentityService.Identity.Domain.Helper
 {
     public class PasswordHasher
@@ -15,10 +14,8 @@ namespace IdentityService.Identity.Domain.Helper
                 Iterations = 4,
                 MemorySize = 65536
             };
-
             return argon2.GetBytes(32);
         }
-
         public static byte[] GenerateSalt(int size = 16)
         {
             var salt = new byte[size];
@@ -32,5 +29,4 @@ namespace IdentityService.Identity.Domain.Helper
             return CryptographicOperations.FixedTimeEquals(hash, expectedHash);
         }
     }
-    
 }

@@ -1,22 +1,22 @@
-
 using AbstractionBlocks.Common.Exception.Logger;
 using IdentityService.Application.Exceptions;
 using IdentityService.Application.Helper;
 using IdentityService.Application.Provider;
 using IdentityService.Application.UOW;
+using AbstractionBlocks.Common.Application.Interfaces;
+using AbstractionBlocks.Common.Domain;
 using IdentityService.Identity.Domain;
 using MediatR;
-
 namespace IdentityService.Application.Auth.Identity.Commands
 {
     public record AssignRoleCommand(Guid UserId, Guid RoleId, Guid TargetRoleId) : IRequest<TokenResponse>;
     public class AssignRoleCommandHandler : IRequestHandler<AssignRoleCommand, TokenResponse>
     {
-        private readonly IUnitOfWork _uow;
+        private readonly IdentityService.Application.UOW.IUnitOfWork _uow;
         private readonly IApplicationDispatcher _dispatcher;
         private readonly ILoggerService<AssignRoleCommandHandler> _logger;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
-        public AssignRoleCommandHandler(IUnitOfWork uow, ILoggerService<AssignRoleCommandHandler> logger,
+        public AssignRoleCommandHandler(IdentityService.Application.UOW.IUnitOfWork uow, ILoggerService<AssignRoleCommandHandler> logger,
         IApplicationDispatcher dispatcher, IJwtTokenGenerator jwtTokenGenerator)
         {
             _uow = uow;
@@ -24,7 +24,6 @@ namespace IdentityService.Application.Auth.Identity.Commands
             _dispatcher = dispatcher;
             _jwtTokenGenerator = jwtTokenGenerator;
         }
-
         public async Task<TokenResponse> Handle(AssignRoleCommand request, CancellationToken cancellationToken)
         {
             var result = await _uow.IdentityUserAssingRoleAsync(request.UserId, request.RoleId, request.TargetRoleId);

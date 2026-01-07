@@ -1,31 +1,29 @@
 using AbstractionBlocks.Common.Exception.Logger;
-using IdentityService.Application;
+using AbstractionBlocks.Common.Application.Interfaces;
+using AbstractionBlocks.Common.Domain;
 using IdentityService.Application.Exceptions;
 using IdentityService.Application.Helper;
-using IdentityService.Application.Interfaces;
 using IdentityService.Application.Provider;
 using IdentityService.Application.UOW;
+using IdentityService.Identity.Application.Provider;
 using IdentityService.Identity.Application.Repository;
 using IdentityService.Identity.Domain;
 using MediatR;
 using Microsoft.Extensions.Configuration;
-
 namespace IdentityService.Identity.Application.Auth.Identity.Commands
 {
     public record BlockUserCommand(Guid Id) : IRequest<TokenResponse>;
     public class BlockUserCommandHandler : IRequestHandler<BlockUserCommand, TokenResponse>
     {
-        private readonly IUnitOfWork _uow;
+        private readonly IdentityService.Application.UOW.IUnitOfWork _uow;
         private readonly ILoggerService<BlockUserCommandHandler> _logger;
         private readonly IApplicationDispatcher _dispatcher;
-
-        public BlockUserCommandHandler(IUnitOfWork uow, ILoggerService<BlockUserCommandHandler> logger, IApplicationDispatcher dispatcher)
+        public BlockUserCommandHandler(IdentityService.Application.UOW.IUnitOfWork uow, ILoggerService<BlockUserCommandHandler> logger, IApplicationDispatcher dispatcher)
         {
             _uow = uow;
             _logger = logger;
             _dispatcher = dispatcher;
         }
-
         public async Task<TokenResponse> Handle(BlockUserCommand request, CancellationToken cancellationToken)
         {
             var result = await _uow.IdentityRepository.GetByIdAsync(request.Id);
@@ -57,7 +55,7 @@ namespace IdentityService.Identity.Application.Auth.Identity.Commands
             );
             audit.AddAuditEvent();
             await _dispatcher.Dispatch(audit.Events);
-            var token = _uow.JwtTokenGenerator.GenerateToken(result, await _uow.RoleRepository.GetAllPermissionsAsync(result.RoleIds)); 
+            var token = _uow.JwtTokenGenerator.GenerateToken(result, await _uow.RoleRepository.GetAllPermissionsAsync(result.RoleIds));
             return new TokenResponse(token, refresh, DateTime.UtcNow);
         }
     }

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="14.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Category.Domain\Category.Domain.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common\Common.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Application\Common.Application.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Exception\Common.Exception.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Validation\Common.Validation.csproj" />
+  </ItemGroup>
+
+</Project>

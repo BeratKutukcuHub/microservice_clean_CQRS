@@ -1,23 +1,19 @@
-
 using AbstractionBlocks.Common.Exception.Logger;
 using IdentityService.Application.UOW;
 using IdentityService.Identity.Domain;
 using MediatR;
-
 namespace IdentityService.Application.Auth.Identity.Commands
 {
     public record CreateIdentityCommand(string? name, string email, string password) : IRequest<Guid>;
     public class CreateIdentityCommandHandler : IRequestHandler<CreateIdentityCommand, Guid>
     {
-        private readonly IUnitOfWork _uow;
+        private readonly IdentityService.Application.UOW.IUnitOfWork _uow;
         private readonly ILoggerService<CreateIdentityCommandHandler> _logger;
-
-        public CreateIdentityCommandHandler(IUnitOfWork uow, ILoggerService<CreateIdentityCommandHandler> logger)
+        public CreateIdentityCommandHandler(IdentityService.Application.UOW.IUnitOfWork uow, ILoggerService<CreateIdentityCommandHandler> logger)
         {
             _uow = uow;
             _logger = logger;
         }
-
         public async Task<Guid> Handle(CreateIdentityCommand request, CancellationToken cancellationToken)
         {
             var id = await _uow.IdentityRepository.AddAsync(

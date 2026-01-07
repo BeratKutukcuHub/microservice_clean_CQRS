@@ -1,5 +1,4 @@
 using AbstractionBlocks.Common.Exception;
-
 namespace IdentityService.Application.Exceptions
 {
     public class UserNotCreateInfoErrors : ValidationException
@@ -9,7 +8,6 @@ namespace IdentityService.Application.Exceptions
             Dictionary<string, string[]> errors
         ) : base(message, errors)
         {
-
         }
     }
 }

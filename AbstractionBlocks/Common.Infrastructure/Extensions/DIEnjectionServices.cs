@@ -1,9 +1,10 @@
 using AbstractionBlocks.Common.SecretBase.Options;
 using AbstractionBlocks.Common.SecretBase.Provider;
 using AbstractionBlocks.Common.Infrastructure.Persistance;
+using AbstractionBlocks.Common.Infrastructure.UnitOfWork;
+using AbstractionBlocks.Common.Application.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
-
 namespace AbstractionBlocks.Common.Infrastructure.Extensions
 {
     public static class DIEnjectionServices
@@ -14,7 +15,6 @@ namespace AbstractionBlocks.Common.Infrastructure.Extensions
     Type[] mongoDatabases)
     {
     services.AddSingleton<ISecretProvider<MongoDBOptions>, SecretProvider<MongoDBOptions>>();
-
     services.AddSingleton<IMongoClient>(sp =>
     {
         var opt = sp.GetRequiredService<ISecretProvider<MongoDBOptions>>().GetSection();
@@ -22,10 +22,8 @@ namespace AbstractionBlocks.Common.Infrastructure.Extensions
         var settings = MongoClientSettings.FromConnectionString(opt.ConnectionString);
         return new MongoClient(settings);
     });
-
     services.AddSingleton(sp =>
         sp.GetRequiredService<IMongoClient>().GetDatabase(databaseName));
-
     foreach (var mongoDatabase in mongoDatabases)
     {
         services.AddSingleton(typeof(MongoDatabase<>).MakeGenericType(mongoDatabase), sp =>
@@ -34,8 +32,8 @@ namespace AbstractionBlocks.Common.Infrastructure.Extensions
             return Activator.CreateInstance(typeof(MongoDatabase<>).MakeGenericType(mongoDatabase), db);
         });
     }
+    services.AddScoped<IUnitOfWork, MongoUnitOfWork>();
     return services;
-
     }
     }
 }

@@ -1,6 +1,5 @@
 using System.Net.Mail;
 using System.Text.RegularExpressions;
-
 namespace IdentityService.Identity.Domain.Helper
 {
     public class Checkers
@@ -23,7 +22,5 @@ namespace IdentityService.Identity.Domain.Helper
             bool isValid = Regex.IsMatch(password, pattern);
             return isValid;
         }
-
     }
-    
 }

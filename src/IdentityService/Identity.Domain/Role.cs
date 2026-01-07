@@ -1,28 +1,25 @@
+using System.Text.Json.Serialization;
 using AbstractionBlocks.Common.Domain;
-
 namespace IdentityService.Identity.Domain
 {
     public class Role : Entity, IAggregateRoot
     {
         public List<string> Permissions { get; private set; } = new();
-
-        public IReadOnlyList<IEventDomain> Events => throw new NotImplementedException();
-
+        private readonly List<IEventDomain> _events = new();
+        [JsonIgnore]
+        public IReadOnlyList<IEventDomain> Events => _events;
         private Role(Guid id, string name)
         {
             Id = id;
             CreatedAt = DateTime.UtcNow;
             Name = name;
         }
-
         public static Role Create(string name) => new Role(Guid.NewGuid(), name);
-
         public void AddPermission(string permission)
         {
             if (!Permissions.Contains(permission))
                 Permissions.Add(permission);
         }
-
         public void RemovePermission(string permission)
         {
             Permissions.Remove(permission);
