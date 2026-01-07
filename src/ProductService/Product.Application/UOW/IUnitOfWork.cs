@@ -2,7 +2,7 @@ using ProductService.Product.Application.Repository;
 using AbstractionBlocks.Common.Application.Interfaces;
 namespace ProductService.Product.Application.UOW
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork : AbstractionBlocks.Common.Application.Interfaces.IUnitOfWork
     {
         ICurrentUser CurrentUser { get; }
         IProductRepository ProductRepository { get; }

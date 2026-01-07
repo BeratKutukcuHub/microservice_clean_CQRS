@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace MailNotification.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/mail")]
     public class MailController : ControllerBase
     {
         private readonly ISender _sender;
@@ -12,7 +12,7 @@ namespace MailNotification.Api.Controllers
         {
             _sender = sender;
         }
-        [HttpPost("Send")]
+        [HttpPost]
         public async Task<ActionResult<Guid>> SendMail(SendMailCommand command)
         {
             var result = await _sender.Send(command);

@@ -7,7 +7,7 @@ using ProductEntity = ProductService.Product.Domain.Product;
 namespace ProductService.Product.Api.Controller
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/product")]
     public class ProductController : ControllerBase
     {
         private readonly ISender _sender;
@@ -15,50 +15,50 @@ namespace ProductService.Product.Api.Controller
         {
             _sender = sender;
         }
-        [HttpPost("Create")]
+        [HttpPost]
         public async Task<ActionResult<Guid>> Create(CreateProductCommand command)
         {
             var result = await _sender.Send(command);
             return Ok(result);
         }
-        [HttpPut("Update")]
-        public async Task<ActionResult<Guid>> Update(UpdateProductCommand command)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Guid>> Update(Guid id, UpdateProductCommand command)
         {
             var result = await _sender.Send(command);
             return Ok(result);
         }
-        [HttpDelete("Delete/{Id}")]
-        public async Task<ActionResult<bool>> Delete(Guid Id)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<bool>> Delete(Guid id)
         {
-            var result = await _sender.Send(new DeleteProductCommand(Id));
+            var result = await _sender.Send(new DeleteProductCommand(id));
             return Ok(result);
         }
-        [HttpPatch("Activate/{Id}")]
-        public async Task<ActionResult<bool>> Activate(Guid Id)
+        [HttpPatch("{id}/activate")]
+        public async Task<ActionResult<bool>> Activate(Guid id)
         {
-            var result = await _sender.Send(new ActivateProductCommand(Id));
+            var result = await _sender.Send(new ActivateProductCommand(id));
             return Ok(result);
         }
-        [HttpPatch("Deactivate/{Id}")]
-        public async Task<ActionResult<bool>> Deactivate(Guid Id)
+        [HttpPatch("{id}/deactivate")]
+        public async Task<ActionResult<bool>> Deactivate(Guid id)
         {
-            var result = await _sender.Send(new DeactivateProductCommand(Id));
+            var result = await _sender.Send(new DeactivateProductCommand(id));
             return Ok(result);
         }
-        [HttpGet("GetById/{Id}")]
-        public async Task<ActionResult<ProductEntity>> GetById(Guid Id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ProductEntity>> GetById(Guid id)
         {
-            var result = await _sender.Send(new GetProductByIdQuery(Id));
+            var result = await _sender.Send(new GetProductByIdQuery(id));
             return Ok(result);
         }
-        [HttpGet("GetAll")]
+        [HttpGet]
         public async Task<ActionResult<PaginationResponse<ProductEntity>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 50)
         {
             var query = new GetAllProductsQuery(pageNumber, pageSize);
             var result = await _sender.Send(query);
             return Ok(result);
         }
-        [HttpGet("GetActive")]
+        [HttpGet("active")]
         public async Task<ActionResult<IEnumerable<ProductEntity>>> GetActive()
         {
             var result = await _sender.Send(new GetActiveProductsQuery());

@@ -5,7 +5,8 @@ public class ResponseWrapperMiddleware : IMiddleware
 {
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        if (!context.Request.Path.StartsWithSegments("/api"))
+        if (!context.Request.Path.StartsWithSegments("/api") && 
+            !context.Request.Path.StartsWithSegments("/gateway"))
         {
             await next(context);
             return;

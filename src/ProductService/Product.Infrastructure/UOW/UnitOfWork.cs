@@ -9,6 +9,8 @@ namespace ProductService.Product.Infrastructure.UOW
         public IProductRepository ProductRepository { get; }
         public IAuditRepository AuditRepository { get; }
         private readonly IMongoClient _client;
+        private IClientSessionHandle? _session;
+
         public UnitOfWork(
             IProductRepository productRepository,
             IAuditRepository auditRepository,
@@ -20,6 +22,41 @@ namespace ProductService.Product.Infrastructure.UOW
             _client = client;
             CurrentUser = currentUser;
         }
+
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            // MongoDB doesn't have a traditional SaveChanges concept
+            // Changes are saved immediately with each operation
+            return await Task.FromResult(0);
+        }
+
+        public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+        {
+            _session = await _client.StartSessionAsync(cancellationToken: cancellationToken);
+            _session.StartTransaction();
+        }
+
+        public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+        {
+            if (_session != null)
+            {
+                await _session.CommitTransactionAsync(cancellationToken);
+            }
+        }
+
+        public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
+        {
+            if (_session != null)
+            {
+                await _session.AbortTransactionAsync(cancellationToken);
+            }
+        }
+
+        public void Dispose()
+        {
+            _session?.Dispose();
+        }
+
         private async Task TransactionAsync(Func<IClientSessionHandle, Task> action)
         {
             using var session = await _client.StartSessionAsync();

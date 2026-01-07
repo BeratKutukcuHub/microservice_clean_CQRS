@@ -7,7 +7,7 @@ using Shared.Authentication.Security;
 namespace IdentityService.Application.Api.Controller
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/role")]
     public class RoleController : ControllerBase
     {
         private readonly ISender _sender;
@@ -15,46 +15,46 @@ namespace IdentityService.Application.Api.Controller
         {
             _sender = sender;
         }
-        [HttpPost("Create")]
+        [HttpPost]
         [HasPermission("Role.Create")]
         public async Task<ActionResult<RoleDto>> Create(CreateRoleCommand command)
         {
             var result = await _sender.Send(command);
             return Ok(result);
         }
-        [HttpGet("GetAll")]
+        [HttpGet]
         [HasPermission("Role.ViewAll")]
         public async Task<ActionResult<IEnumerable<RoleDto>>> GetAll()
         {
             var result = await _sender.Send(new GetAllRolesQuery());
             return Ok(result);
         }
-        [HttpGet("GetById/{Id}")]
+        [HttpGet("{id}")]
         [HasPermission("Role.ViewAll")]
-        public async Task<ActionResult<RoleDto>> GetById(Guid Id)
+        public async Task<ActionResult<RoleDto>> GetById(Guid id)
         {
-            var result = await _sender.Send(new GetRoleByIdQuery(Id));
+            var result = await _sender.Send(new GetRoleByIdQuery(id));
             return Ok(result);
         }
-        [HttpPost("AddPermission")]
+        [HttpPost("{id}/permissions")]
         [HasPermission("Role.Update")]
-        public async Task<ActionResult<bool>> AddPermission(AddPermissionToRoleCommand command)
+        public async Task<ActionResult<bool>> AddPermission(Guid id, AddPermissionToRoleCommand command)
         {
             var result = await _sender.Send(command);
             return Ok(result);
         }
-        [HttpPost("RemovePermission")]
+        [HttpDelete("{id}/permissions")]
         [HasPermission("Role.Update")]
-        public async Task<ActionResult<bool>> RemovePermission(RemovePermissionFromRoleCommand command)
+        public async Task<ActionResult<bool>> RemovePermission(Guid id, RemovePermissionFromRoleCommand command)
         {
             var result = await _sender.Send(command);
             return Ok(result);
         }
-        [HttpDelete("Delete/{Id}")]
+        [HttpDelete("{id}")]
         [HasPermission("Role.Delete")]
-        public async Task<ActionResult<bool>> Delete(Guid Id)
+        public async Task<ActionResult<bool>> Delete(Guid id)
         {
-            var result = await _sender.Send(new DeleteRoleCommand(Id));
+            var result = await _sender.Send(new DeleteRoleCommand(id));
             return Ok(result);
         }
     }

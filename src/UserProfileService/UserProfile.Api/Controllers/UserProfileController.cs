@@ -6,7 +6,7 @@ using UserProfileService.Application.Queries.GetUserProfile;
 namespace UserProfileService.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/userprofile")]
     public class UserProfileController : ControllerBase
     {
         private readonly IMediator _mediator;

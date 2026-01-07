@@ -10,7 +10,7 @@ using IdentityService.Identity.Application.Auth.Identity.Commands;
 namespace IdentityService.Application.Api.Controller
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/identityuser")]
     public class IdentityUserController : ControllerBase
     {
         private readonly ISender _sender;
@@ -18,55 +18,55 @@ namespace IdentityService.Application.Api.Controller
         {
             _sender = sender;
         }
-        [HttpPost("Login")]
+        [HttpPost("login")]
         public async Task<ActionResult<LoginResponse>> Login(LoginCommand command)
         {
             var result = await _sender.Send(command);
             return Ok(result);
         }
-        [HttpPost("Register")]
+        [HttpPost("register")]
         public async Task<ActionResult<Guid>> Register(CreateIdentityCommand command)
         {
             var result = await _sender.Send(command);
             return Ok(result);
         }
-        [HttpGet("RefreshToken")]
-        public async Task<ActionResult> RefreshToken([FromQuery] RefreshTokenCommand command)
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
         {
             var result = await _sender.Send(command);
             return Ok(result);
         }
         [Authorize(Policy = "IsBlocked")]
-        [HttpPut("Update")]
+        [HttpPut("{id}")]
         [Authorize]
-        public async Task<ActionResult> Update(UpdateIdentityCommand command)
+        public async Task<ActionResult> Update(Guid id, UpdateIdentityCommand command)
         {
             var result = await _sender.Send(command);
             return Ok(result);
         }
-        [HttpDelete("Delete/{Id}")]
+        [HttpDelete("{id}")]
         [HasPermission("User.Delete")]
-        public async Task<ActionResult<bool>> Delete(Guid Id)
+        public async Task<ActionResult<bool>> Delete(Guid id)
         {
-            var result = await _sender.Send(new DeleteIdentityUserCommand(Id));
+            var result = await _sender.Send(new DeleteIdentityUserCommand(id));
             return Ok(result);
         }
-        [HttpPost("Block/{Id}")]
+        [HttpPatch("{id}/block")]
         [HasPermission("User.Update")]
-        public async Task<ActionResult<bool>> Block(Guid Id)
+        public async Task<ActionResult<bool>> Block(Guid id)
         {
-            var result = await _sender.Send(new BlockUserCommand(Id));
+            var result = await _sender.Send(new BlockUserCommand(id));
             return Ok(result);
         }
-        [HttpGet("GetById/{Id}")]
+        [HttpGet("{id}")]
         [Authorize]
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
-        public async Task<ActionResult<IdentityUserDto>> GetById(Guid Id)
+        public async Task<ActionResult<IdentityUserDto>> GetById(Guid id)
         {
-            var result = await _sender.Send(new GetByIdIdentityCommand(Id));
+            var result = await _sender.Send(new GetByIdIdentityCommand(id));
             return Ok(result);
         }
-        [HttpGet("GetAll")]
+        [HttpGet]
         [HasPermission("User.ViewAll")]
         [ResponseCache(Duration = 120, Location = ResponseCacheLocation.Any, NoStore = false)]
         public async Task<ActionResult<IEnumerable<IdentityUserDto>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 50)
@@ -80,9 +80,9 @@ namespace IdentityService.Application.Api.Controller
             var result = await _sender.Send(command);
             return Ok(result);
         }
-        [HttpPost("AssignRole")]
+        [HttpPost("{id}/roles")]
         [HasPermission("User.Update")]
-        public async Task<ActionResult<bool>> AssignRole(AssignRoleCommand command)
+        public async Task<ActionResult<bool>> AssignRole(Guid id, AssignRoleCommand command)
         {
             var result = await _sender.Send(command);
             return Ok(result);
