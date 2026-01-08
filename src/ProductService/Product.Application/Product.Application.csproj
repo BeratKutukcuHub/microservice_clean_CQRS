@@ -12,6 +12,7 @@
     <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Application\Common.Application.csproj" />
     <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Exception\Common.Exception.csproj" />
     <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Validation\Common.Validation.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Messaging\Common.Messaging.csproj" />
     <ProjectReference Include="..\..\..\AbstractionBlocks\Common\Common.csproj" />
   </ItemGroup>
 

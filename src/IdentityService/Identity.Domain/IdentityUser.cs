@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Text;
 using IdentityService.Identity.Domain.Exceptions;
 using IdentityService.Identity.Domain.Helper;
+using IdentityService.Identity.Domain.Events;
 using AbstractionBlocks.Common.Domain;
 using System.Text.Json.Serialization;
 namespace IdentityService.Identity.Domain
@@ -36,7 +37,16 @@ namespace IdentityService.Identity.Domain
                 var salt = PasswordHasher.GenerateSalt(16);
                 var hash = Convert.ToBase64String(PasswordHasher.HashPassword(passwordhash, salt
                 ));
-                return new IdentityUser(Guid.NewGuid(), name, email, hash, Convert.ToBase64String(salt));
+                var user = new IdentityUser(Guid.NewGuid(), name, email, hash, Convert.ToBase64String(salt));
+                
+                // Raise integration event
+                user._events.Add(new UserCreatedIntegrationEvent(
+                    user.Id,
+                    user.Name ?? string.Empty,
+                    user.Email,
+                    user.RoleIds));
+                
+                return user;
             }
             throw new UserIsNotValid();
         }
@@ -73,17 +83,42 @@ namespace IdentityService.Identity.Domain
             }
             UpdatedAt = DateTime.UtcNow;
             UpdatedById = Id;
+            
+            // Raise integration event
+            _events.Add(new UserUpdatedIntegrationEvent(
+                Id,
+                Name ?? string.Empty,
+                Email,
+                RoleIds));
+            
             return this;
         }
-        public void SoftDelete() => IsDeleted = true;
+        public void SoftDelete()
+        {
+            IsDeleted = true;
+            
+            // Raise integration event
+            _events.Add(new UserDeletedIntegrationEvent(
+                Id,
+                Email,
+                true));
+        }
         public void AddRole(Guid RoleId)
         {
             if (!RoleIds.Contains(RoleId))
             {
                 RoleIds.Add(RoleId);
+                
+                // Raise integration event
+                _events.Add(new RoleAssignedIntegrationEvent(Id, RoleId));
             }
             else throw new UserHasRole(RoleId.ToString());
         }
+        public void ClearEvents()
+        {
+            _events.Clear();
+        }
+
         public Guid AddRefreshToken()
         {
             var newtoken = Guid.NewGuid();

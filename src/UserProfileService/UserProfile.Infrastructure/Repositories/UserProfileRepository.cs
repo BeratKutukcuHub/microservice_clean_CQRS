@@ -26,6 +26,12 @@ namespace UserProfileService.Infrastructure.Repositories
             var filter = Builders<UserProfileService.Domain.Entities.UserProfile>.Filter.Eq(x => x.UserId, userId);
             return await Collection.Find(filter).FirstOrDefaultAsync();
         }
+
+        public async Task<List<UserProfileService.Domain.Entities.UserProfile>> GetAllAsync()
+        {
+            return await Collection.Find(_ => true).ToListAsync();
+        }
+
         public async Task<bool> AddAsync(UserProfileService.Domain.Entities.UserProfile userProfile)
         {
             try

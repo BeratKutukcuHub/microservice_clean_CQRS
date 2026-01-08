@@ -4,6 +4,7 @@
     <ProjectReference Include="..\UserProfile.Domain\UserProfile.Domain.csproj" />
     <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Application\Common.Application.csproj" />
     <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Validation\Common.Validation.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Messaging\Common.Messaging.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,24 +4,36 @@ using AbstractionBlocks.DIEnjections;
 using AbstractionBlocks.Common.Exception.Logger;
 using AbstractionBlocks.Common.SecretBase.DI;
 using AbstractionBlocks.Common.Infrastructure.DI;
+using AbstractionBlocks.Common.Messaging.DI;
 using Microsoft.OpenApi.Models;
 using NLog.Web;
+
 NLog.LogManager.Setup().LoadConfigurationFromAppSettings();
 var logger = NLog.LogManager.GetCurrentClassLogger();
+
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Logging.ClearProviders();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 builder.Host.UseNLog();
+
 builder.Services.AddControllers();
 builder.Services.AddRouting();
+
 builder.Services.AddDIEnjectionsSecretBase();
 builder.Services.AddDICommonInfrastructure();
 builder.Services.AddResponseCaching();
+
 builder.Services.AddMailNotificationApplicationDIServices();
 builder.Services.AddMailNotificationInfrastructureDIServices();
+
+// Add RabbitMQ
+builder.Services.AddRabbitMQMessaging(builder.Configuration, "RabbitMQ");
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddGlobalExceptionHandler();
 builder.Services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "MailNotification.Api", Version = "v1" });
@@ -38,4 +50,5 @@ app.UseRouting();
 app.MapControllers();
 app.MapSwagger();
 app.UseSwaggerUI();
+
 app.Run();

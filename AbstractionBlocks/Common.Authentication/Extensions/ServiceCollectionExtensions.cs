@@ -2,18 +2,19 @@ using System.Text;
 using AbstractionBlocks.Common.SecretBase.Options;
 using AbstractionBlocks.Common.SecretBase.Provider;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 namespace Shared.Authentication
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddDICommonAuthentication(this IServiceCollection services)
+        public static IServiceCollection AddDICommonAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddAuthentication()
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                ISecretProvider<JwtOptions> provider = new SecretProvider<JwtOptions>();
+                ISecretProvider<JwtOptions> provider = new SecretProvider<JwtOptions>(configuration);
                 var secretProvider = provider.GetSection();
                 options.TokenValidationParameters = new TokenValidationParameters
                 {

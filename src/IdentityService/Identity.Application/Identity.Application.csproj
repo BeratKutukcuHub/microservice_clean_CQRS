@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\..\AbstractionBlocks\Common\Common.csproj" />
     <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Authentication\Common.Authentication.csproj" />
     <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Validation\Common.Validation.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Messaging\Common.Messaging.csproj" />
   </ItemGroup>
 
 </Project>

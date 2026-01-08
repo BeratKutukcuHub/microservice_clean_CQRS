@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Domain\Common.Domain.csproj" />
+    <ProjectReference Include="..\..\..\AbstractionBlocks\Common.Messaging\Common.Messaging.csproj" />
   </ItemGroup>
 
 </Project>

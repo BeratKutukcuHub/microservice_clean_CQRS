@@ -1,23 +1,32 @@
 using AbstractionBlocks.Common.Application.Interfaces;
 using AbstractionBlocks.Common.Domain;
 using AbstractionBlocks.Common.Exception;
+using AbstractionBlocks.Common.Messaging.Interfaces;
+using AbstractionBlocks.Common.Messaging.Events;
 using Category.Application.Interfaces;
 using MediatR;
+
 namespace Category.Application.UseCases.Categories.Commands.DeleteCategory;
+
 public class DeleteCategoryHandler : IRequestHandler<DeleteCategoryCommand, Unit>
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly ICurrentUser _currentUser;
     private readonly IApplicationDispatcher _dispatcher;
+    private readonly IEventBus _eventBus;
+
     public DeleteCategoryHandler(
         ICategoryRepository categoryRepository,
         ICurrentUser currentUser,
-        IApplicationDispatcher dispatcher)
+        IApplicationDispatcher dispatcher,
+        IEventBus eventBus)
     {
         _categoryRepository = categoryRepository;
         _currentUser = currentUser;
         _dispatcher = dispatcher;
+        _eventBus = eventBus;
     }
+
     public async Task<Unit> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
     {
         var category = await _categoryRepository.GetByIdAsync(request.Id);
@@ -25,9 +34,22 @@ public class DeleteCategoryHandler : IRequestHandler<DeleteCategoryCommand, Unit
         {
             throw new NotFoundException($"Category with ID {request.Id} not found");
         }
-        category.Delete();
+
+        category.Delete(_currentUser.UserId);
+
         await _categoryRepository.DeleteAsync(request.Id);
+
         await _dispatcher.Dispatch(category.Events);
+
+        // Publish integration events from domain
+        foreach (var domainEvent in category.Events)
+        {
+            if (domainEvent is IntegrationEvent integrationEvent)
+            {
+                await _eventBus.PublishAsync(integrationEvent, cancellationToken);
+            }
+        }
+
         var audit = AuditLog.Create(
             "Category",
             category.Id,
@@ -40,8 +62,12 @@ public class DeleteCategoryHandler : IRequestHandler<DeleteCategoryCommand, Unit
                 new() { Field = "Status", OldValue = "Active", NewValue = "Deleted" }
             }
         );
+
         audit.AddAuditEvent();
         await _dispatcher.Dispatch(audit.Events);
+
+        category.ClearEvents();
+
         return Unit.Value;
     }
 }

@@ -1,4 +1,6 @@
 using AbstractionBlocks.Common.Exception.Logger;
+using AbstractionBlocks.Common.Messaging.Events;
+using AbstractionBlocks.Common.Messaging.Interfaces;
 using IdentityService.Application.Auth.Identity.Profile;
 using IdentityService.Application.Exceptions;
 using IdentityService.Application.UOW;
@@ -21,11 +23,18 @@ namespace IdentityService.Application.Auth.Identity.Commands
         private readonly IdentityService.Application.UOW.IUnitOfWork _uow;
         private readonly ILoggerService<UpdateIdentityCommandHandler> _logger;
         private readonly IApplicationDispatcher _dispatcher;
-        public UpdateIdentityCommandHandler(IdentityService.Application.UOW.IUnitOfWork uow, ILoggerService<UpdateIdentityCommandHandler> logger, IApplicationDispatcher dispatcher)
+        private readonly IEventBus _eventBus;
+
+        public UpdateIdentityCommandHandler(
+            IdentityService.Application.UOW.IUnitOfWork uow,
+            ILoggerService<UpdateIdentityCommandHandler> logger,
+            IApplicationDispatcher dispatcher,
+            IEventBus eventBus)
         {
             _uow = uow;
             _logger = logger;
             _dispatcher = dispatcher;
+            _eventBus = eventBus;
         }
         public async Task<UpdateIdentityResponse> Handle(UpdateIdentityCommand request, CancellationToken cancellationToken)
         {
@@ -57,6 +66,18 @@ namespace IdentityService.Application.Auth.Identity.Commands
             "UpdateIdentityCommandHandler", changes);
             audit.AddAuditEvent();
             await _dispatcher.Dispatch(audit.Events);
+
+            // Publish integration events from entity
+            foreach (var domainEvent in updated.Events)
+            {
+                if (domainEvent is IntegrationEvent integrationEvent)
+                {
+                    await _eventBus.PublishAsync(integrationEvent, cancellationToken);
+                }
+            }
+            
+            updated.ClearEvents();
+
             return new UpdateIdentityResponse(response.Id, response.Name, response.Email);
         }
     }

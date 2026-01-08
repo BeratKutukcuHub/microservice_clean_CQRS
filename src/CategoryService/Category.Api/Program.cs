@@ -5,27 +5,39 @@ using AbstractionBlocks.DIEnjections;
 using AbstractionBlocks.Common.Exception.Logger;
 using AbstractionBlocks.Common.SecretBase.DI;
 using AbstractionBlocks.Common.Infrastructure.DI;
+using AbstractionBlocks.Common.Messaging.DI;
 using NLog.Web;
 using Microsoft.AspNetCore.Authorization;
 using Shared.Authentication;
 using AbstractionBlocks.Common.Authentication.Security;
+
 NLog.LogManager.Setup().LoadConfigurationFromAppSettings();
 var logger = NLog.LogManager.GetCurrentClassLogger();
+
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Logging.ClearProviders();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 builder.Host.UseNLog();
+
 builder.Services.AddControllers();
 builder.Services.AddRouting();
+
 builder.Services.AddDIEnjectionsSecretBase();
-builder.Services.AddDICommonAuthentication();
+builder.Services.AddDICommonAuthentication(builder.Configuration);
 builder.Services.AddDICommonInfrastructure();
 builder.Services.AddResponseCaching();
+
 builder.Services.AddCategoryApplicationServices();
 builder.Services.AddCategoryInfrastructureServices();
+
+// Add RabbitMQ
+builder.Services.AddRabbitMQMessaging(builder.Configuration, "RabbitMQ");
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddGlobalExceptionHandler();
 builder.Services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
+
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 builder.Services.AddSwaggerGen(c =>

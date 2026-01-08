@@ -27,7 +27,7 @@ namespace UserProfileService.Domain.Entities
         {
             _events.Clear();
         }
-        public static UserProfile Create(Guid userId, string firstName, string lastName, string email, string? phoneNumber = null, Address? address = null)
+        public static UserProfile Create(Guid userId, string firstName, string lastName, string email, string? phoneNumber = null, Address? address = null, Guid? createdBy = null)
         {
             var profile = new UserProfile
             {
@@ -38,11 +38,55 @@ namespace UserProfileService.Domain.Entities
                 Email = email,
                 PhoneNumber = phoneNumber,
                 Address = address,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                CreateById = createdBy ?? Guid.Empty
             };
             profile.AddDomainEvent(new UserProfileCreatedEvent(profile));
+            
+            // Raise integration event
+            profile.AddDomainEvent(new UserProfileCreatedIntegrationEvent(
+                profile.Id,
+                profile.UserId,
+                profile.FirstName,
+                profile.LastName,
+                profile.Email,
+                profile.PhoneNumber));
+            
             return profile;
         }
+
+        public void UpdateProfile(string firstName, string lastName, string email, string? phoneNumber, Address? address, Guid? updatedBy = null)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+            Email = email;
+            PhoneNumber = phoneNumber;
+            Address = address;
+            UpdatedAt = DateTime.UtcNow;
+            UpdatedById = updatedBy;
+
+            // Raise integration event
+            AddDomainEvent(new UserProfileUpdatedIntegrationEvent(
+                Id,
+                UserId,
+                FirstName,
+                LastName,
+                Email,
+                PhoneNumber));
+        }
+
+        public void Delete(Guid? deletedBy = null)
+        {
+            IsDeleted = true;
+            UpdatedAt = DateTime.UtcNow;
+            UpdatedById = deletedBy;
+
+            // Raise integration event
+            AddDomainEvent(new UserProfileDeletedIntegrationEvent(
+                Id,
+                UserId));
+        }
+
         public UserProfile() { }
     }
 }

@@ -19,7 +19,17 @@ namespace AbstractionBlocks.Common.SecretBase.Provider
         }
         public TBind GetSection()
         {
+            // First try to get from IConfiguration (includes appsettings.json and environment variables)
             var section = _localConfig.GetSection(typeof(TBind).Name);
+            
+            // If not found, try without "Options" suffix (e.g., "MongoDB" instead of "MongoDBOptions")
+            if (!section.Exists())
+            {
+                var nameWithoutOptions = typeof(TBind).Name.Replace("Options", "");
+                section = _localConfig.GetSection(nameWithoutOptions);
+            }
+            
+            // If still not found, try to find secretbase.json file
             if (!section.Exists())
             {
                 string? found = null;

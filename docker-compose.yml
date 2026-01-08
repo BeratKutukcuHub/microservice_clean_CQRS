@@ -1,0 +1,209 @@
+services:
+  # Infrastructure Services
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - microservices-network
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Microservices
+  identity-service:
+    build:
+      context: .
+      dockerfile: src/IdentityService/Dockerfile
+    container_name: identity-service
+    restart: always
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - MongoDB__ConnectionString=mongodb://mongodb:27017
+      - MongoDB__DatabaseName=IdentityDatabase
+      - JwtOptions__SecretKey=DBLOGHANDLEYourSecretKey123456789
+      - JwtOptions__Issuer=CleanArchitecture
+      - JwtOptions__Audience=CleanArchitecture
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - microservices-network
+
+  product-service:
+    build:
+      context: .
+      dockerfile: src/ProductService/Dockerfile
+    container_name: product-service
+    restart: always
+    ports:
+      - "5002:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - MongoDB__ConnectionString=mongodb://mongodb:27017
+      - MongoDB__DatabaseName=ProductServiceDb
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+      - Cache__Redis__ConnectionString=redis:6379
+      - JwtOptions__SecretKey=DBLOGHANDLEYourSecretKey123456789
+      - JwtOptions__Issuer=CleanArchitecture
+      - JwtOptions__Audience=CleanArchitecture
+    depends_on:
+      - mongodb
+      - rabbitmq
+      - redis
+    networks:
+      - microservices-network
+
+  category-service:
+    build:
+      context: .
+      dockerfile: src/CategoryService/Dockerfile
+    container_name: category-service
+    restart: always
+    ports:
+      - "5003:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - MongoDB__ConnectionString=mongodb://mongodb:27017
+      - MongoDB__DatabaseName=CategoryServiceDb
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+      - JwtOptions__SecretKey=DBLOGHANDLEYourSecretKey123456789
+      - JwtOptions__Issuer=CleanArchitecture
+      - JwtOptions__Audience=CleanArchitecture
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - microservices-network
+
+  userprofile-service:
+    build:
+      context: .
+      dockerfile: src/UserProfileService/Dockerfile
+    container_name: userprofile-service
+    restart: always
+    ports:
+      - "5004:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - MongoDB__ConnectionString=mongodb://mongodb:27017
+      - MongoDB__DatabaseName=UserProfileServiceDb
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+      - JwtOptions__SecretKey=DBLOGHANDLEYourSecretKey123456789
+      - JwtOptions__Issuer=CleanArchitecture
+      - JwtOptions__Audience=CleanArchitecture
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - microservices-network
+
+  mailnotification-service:
+    build:
+      context: .
+      dockerfile: src/MailNotificationService/Dockerfile
+    container_name: mailnotification-service
+    restart: always
+    ports:
+      - "5005:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+      - SmtpSettings__Host=smtp.gmail.com
+      - SmtpSettings__Port=587
+      - SmtpSettings__EnableSsl=true
+      - SmtpSettings__Username=your-email@gmail.com
+      - SmtpSettings__Password=your-app-password
+    depends_on:
+      - rabbitmq
+    networks:
+      - microservices-network
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: src/ApiGateway/Dockerfile
+    container_name: api-gateway
+    restart: always
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+      - identity-service
+      - product-service
+      - category-service
+      - userprofile-service
+      - mailnotification-service
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  rabbitmq_data:
+  redis_data:

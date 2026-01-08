@@ -1,0 +1,137 @@
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/gateway/product/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch" ],
+      "DownstreamPathTemplate": "/api/product/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "product-service",
+          "Port": 8080
+        }
+      ],
+      "SwaggerKey": "product"
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/identityuser/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch" ],
+      "DownstreamPathTemplate": "/api/identityuser/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "identity-service",
+          "Port": 8080
+        }
+      ],
+      "SwaggerKey": "identity"
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/role/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch" ],
+      "DownstreamPathTemplate": "/api/role/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "identity-service",
+          "Port": 8080
+        }
+      ],
+      "SwaggerKey": "identity"
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/categories/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch" ],
+      "DownstreamPathTemplate": "/api/categories/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "category-service",
+          "Port": 8080
+        }
+      ],
+      "SwaggerKey": "category"
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/userprofile/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch" ],
+      "DownstreamPathTemplate": "/api/userprofile/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "userprofile-service",
+          "Port": 8080
+        }
+      ],
+      "SwaggerKey": "userprofile"
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/mail/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch" ],
+      "DownstreamPathTemplate": "/api/mail/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "mailnotification-service",
+          "Port": 8080
+        }
+      ],
+      "SwaggerKey": "mail"
+    }
+  ],
+  "SwaggerEndPoints": [
+    {
+      "Key": "product",
+      "Config": [
+        {
+          "Name": "Product API",
+          "Version": "v1",
+          "Url": "http://product-service:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "identity",
+      "Config": [
+        {
+          "Name": "Identity API",
+          "Version": "v1",
+          "Url": "http://identity-service:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "category",
+      "Config": [
+        {
+          "Name": "Category API",
+          "Version": "v1",
+          "Url": "http://category-service:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "userprofile",
+      "Config": [
+        {
+          "Name": "UserProfile API",
+          "Version": "v1",
+          "Url": "http://userprofile-service:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "mail",
+      "Config": [
+        {
+          "Name": "MailNotification API",
+          "Version": "v1",
+          "Url": "http://mailnotification-service:8080/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://api-gateway:8080"
+  }
+}

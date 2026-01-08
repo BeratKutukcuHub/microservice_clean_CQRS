@@ -1,4 +1,6 @@
 using AbstractionBlocks.Common.Exception.Logger;
+using AbstractionBlocks.Common.Messaging.Events;
+using AbstractionBlocks.Common.Messaging.Interfaces;
 using IdentityService.Application.Exceptions;
 using IdentityService.Application.Helper;
 using IdentityService.Application.Provider;
@@ -16,13 +18,20 @@ namespace IdentityService.Application.Auth.Identity.Commands
         private readonly IApplicationDispatcher _dispatcher;
         private readonly ILoggerService<AssignRoleCommandHandler> _logger;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
-        public AssignRoleCommandHandler(IdentityService.Application.UOW.IUnitOfWork uow, ILoggerService<AssignRoleCommandHandler> logger,
-        IApplicationDispatcher dispatcher, IJwtTokenGenerator jwtTokenGenerator)
+        private readonly IEventBus _eventBus;
+
+        public AssignRoleCommandHandler(
+            IdentityService.Application.UOW.IUnitOfWork uow,
+            ILoggerService<AssignRoleCommandHandler> logger,
+            IApplicationDispatcher dispatcher,
+            IJwtTokenGenerator jwtTokenGenerator,
+            IEventBus eventBus)
         {
             _uow = uow;
             _logger = logger;
             _dispatcher = dispatcher;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _eventBus = eventBus;
         }
         public async Task<TokenResponse> Handle(AssignRoleCommand request, CancellationToken cancellationToken)
         {
@@ -56,6 +65,18 @@ namespace IdentityService.Application.Auth.Identity.Commands
             );
             audit.AddAuditEvent();
             await _dispatcher.Dispatch(audit.Events);
+
+            // Publish integration events from entity
+            foreach (var domainEvent in result.User.Events)
+            {
+                if (domainEvent is IntegrationEvent integrationEvent)
+                {
+                    await _eventBus.PublishAsync(integrationEvent, cancellationToken);
+                }
+            }
+            
+            result.User.ClearEvents();
+
             var token = _jwtTokenGenerator.GenerateToken(result.User, result.Permissions);
             return new TokenResponse(token, result.User.LastRefreshToken(), DateTime.UtcNow);
         }

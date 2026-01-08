@@ -2,6 +2,7 @@ using AbstractionBlocks.Common.Application.DI;
 using AbstractionBlocks.Common.Validation;
 using MailNotification.Application.Commands;
 using Microsoft.Extensions.DependencyInjection;
+
 namespace MailNotification.Application.DI
 {
     public static class MailNotificationApplicationDIServices
@@ -9,9 +10,16 @@ namespace MailNotification.Application.DI
         public static IServiceCollection AddMailNotificationApplicationDIServices(this IServiceCollection services)
         {
             services.AddAutoMapper(cfg => cfg.AddMaps(typeof(SendMailCommand).Assembly));
-            services.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<SendMailCommand>());
+
+            services.AddMediatR(cfg =>
+            {
+                cfg.RegisterServicesFromAssemblyContaining<SendMailCommand>();
+                cfg.AddOpenBehavior(typeof(AbstractionBlocks.Common.Application.Caching.CachingBehavior<,>));
+            });
+
             services.AddValidationInfrastructure(typeof(SendMailCommand).Assembly);
             services.AddCommonApplicationServices();
+
             return services;
         }
     }

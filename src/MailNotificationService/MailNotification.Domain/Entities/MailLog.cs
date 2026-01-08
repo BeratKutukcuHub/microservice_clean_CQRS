@@ -31,12 +31,27 @@ namespace MailNotification.Domain.Entities
         {
             IsSent = true;
             UpdatedAt = DateTime.UtcNow;
+            
+            // Raise integration event
+            AddEvent(new MailSentIntegrationEvent(
+                Id,
+                To,
+                Subject,
+                DateTime.UtcNow));
         }
         public void MarkAsFailed(string errorMessage)
         {
             IsSent = false;
             ErrorMessage = errorMessage;
             UpdatedAt = DateTime.UtcNow;
+            
+            // Raise integration event
+            AddEvent(new MailFailedIntegrationEvent(
+                Id,
+                To,
+                Subject,
+                errorMessage,
+                DateTime.UtcNow));
         }
         public void AddEvent(IEventDomain @event)
         {
